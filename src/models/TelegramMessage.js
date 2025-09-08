@@ -101,7 +101,7 @@ export class TelegramMessage {
     if (typeof text === 'string') {
       return text;
     }
-    
+
     if (Array.isArray(text)) {
       return text
         .map(item => {
@@ -114,7 +114,7 @@ export class TelegramMessage {
         })
         .join('');
     }
-    
+
     return '';
   }
 

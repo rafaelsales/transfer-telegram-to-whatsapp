@@ -115,7 +115,7 @@ describe('PlanGenerator Unit Tests', () => {
 
       const content = generator._extractContent(message);
 
-      expect(content).toBe('[2025-01-01T12:00:00] Hello world');
+      expect(content).toBe('[2025-01-01 12:00:00] Hello world');
     });
 
     it('should return only date prefix for media-only messages', () => {
@@ -130,7 +130,7 @@ describe('PlanGenerator Unit Tests', () => {
 
       const content = generator._extractContent(message);
 
-      expect(content).toBe('[2025-01-01T12:00:00]');
+      expect(content).toBe('[2025-01-01 12:00:00]');
     });
 
     it('should handle messages with media and caption', () => {
@@ -146,7 +146,7 @@ describe('PlanGenerator Unit Tests', () => {
 
       const content = generator._extractContent(message);
 
-      expect(content).toBe('[2025-01-02T13:30:15] Photo caption');
+      expect(content).toBe('[2025-01-02 13:30:15] Photo caption');
     });
   });
 

@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PlanCommand } from './commands/PlanCommand.js';
 import { ExecuteCommand } from './commands/ExecuteCommand.js';
+import { LoginCommand } from './commands/LoginCommand.js';
+import { ListCommand } from './commands/ListCommand.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,7 +23,12 @@ program
   .description('CLI tool for importing Telegram chat exports to WhatsApp')
   .version(packageJson.version)
   .option('--format <format>', 'Output format (json|human)', 'human')
-  .option('--log-level <level>', 'Log level (error|warn|info|debug)', 'info');
+  .option('--log-level <level>', 'Log level (error|warn|info|debug)', 'info')
+  .option(
+    '--debug',
+    'Enable debug mode (show browser window with dev tools)',
+    false
+  );
 
 program
   .command('plan')
@@ -64,7 +71,7 @@ program
   .option('--dry-run', 'Validate plan without sending messages', false)
   .option(
     '--resume',
-    'Resume from last progress (automatic if progress.json exists)',
+    'Force resume from last progress (automatically detects existing progress)',
     false
   )
   .requiredOption(
@@ -78,6 +85,60 @@ program
 
       const executeCommand = ExecuteCommand.create();
       const result = await executeCommand.execute(importPlanPath, allOptions);
+
+      if (result.success) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(99);
+    }
+  });
+
+program
+  .command('login')
+  .description('Authenticate with WhatsApp Web and store session')
+  .action(async (options, command) => {
+    try {
+      const globalOptions = command.parent.opts();
+      const allOptions = { ...globalOptions, ...options };
+
+      const loginCommand = LoginCommand.create();
+      const result = await loginCommand.execute(allOptions);
+
+      if (result.success) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(99);
+    }
+  });
+
+program
+  .command('list')
+  .description('List recent WhatsApp chats with their names and IDs')
+  .option('--limit <number>', 'Maximum number of chats to display', '100')
+  .action(async (options, command) => {
+    try {
+      const globalOptions = command.parent.opts();
+      const allOptions = { ...globalOptions, ...options };
+
+      // Convert limit to number
+      if (allOptions.limit) {
+        allOptions.limit = parseInt(allOptions.limit);
+        if (isNaN(allOptions.limit) || allOptions.limit < 1) {
+          console.error('Error: --limit must be a positive number');
+          process.exit(16);
+        }
+      }
+
+      const listCommand = ListCommand.create();
+      const result = await listCommand.execute(allOptions);
 
       if (result.success) {
         process.exit(0);

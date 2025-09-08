@@ -12,8 +12,9 @@ import { ProgressRecord } from '../models/ProgressRecord.js';
  * Handles WhatsApp client connection, message sending, and rate limiting
  */
 export class WhatsAppImporter {
-  constructor(config = null) {
+  constructor(config = null, options = {}) {
     this.config = config || CLIConfig.createDefault();
+    this.options = options;
     this.runtimeState = new RuntimeState();
     this.client = null;
     this.isConnected = false;
@@ -34,25 +35,46 @@ export class WhatsAppImporter {
     }
 
     try {
+      const isDebugMode = this.options.debug || process.env.DEBUG === 'true';
+
       // Create WhatsApp client with persistent session
       this.client = new Client({
         authStrategy: new LocalAuth({
           clientId: 'telegram-to-whatsapp',
           dataPath: './.wwebjs_auth',
         }),
-        puppeteer: {
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu',
-          ],
-        },
+        puppeteer: isDebugMode
+          ? {
+              executablePath:
+                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+              headless: false, // Show browser window
+              devtools: true, // Open dev tools automatically
+              slowMo: 100, // Slow down operations for easier debugging
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-web-security', // For easier debugging
+                '--disable-features=VizDisplayCompositor',
+                '--start-maximized', // Start browser maximized
+              ],
+            }
+          : {
+              executablePath:
+                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+              headless: true,
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--disable-extensions',
+                '--disable-plugins',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding',
+              ],
+            },
       });
 
       // Set up event handlers
@@ -180,6 +202,17 @@ export class WhatsAppImporter {
             messageId: message.id,
             error: messageResult.error,
           });
+
+          // Stop immediately on first error during real import (not dry-run)
+          if (!options.dryRun) {
+            console.error(
+              `\n❌ Import failed at message ${i + 1}/${messages.length}:`
+            );
+            console.error(`   Message ID: ${message.id}`);
+            console.error(`   Error: ${messageResult.error}`);
+            result.status = 'failed';
+            break;
+          }
         }
 
         // Update progress
@@ -218,6 +251,17 @@ export class WhatsAppImporter {
 
           await this.progressTracker.recordProgress(progressRecord);
         }
+
+        // Stop immediately on first error during real import (not dry-run)
+        if (!options.dryRun) {
+          console.error(
+            `\n❌ Import failed at message ${i + 1}/${messages.length}:`
+          );
+          console.error(`   Message ID: ${message.id}`);
+          console.error(`   Error: ${error.message}`);
+          result.status = 'failed';
+          break;
+        }
       }
 
       // Emit progress event
@@ -230,8 +274,11 @@ export class WhatsAppImporter {
       });
     }
 
-    // Determine final status
-    if (result.processedMessages === result.totalMessages) {
+    // Determine final status (preserve 'failed' status if already set)
+    if (
+      result.status !== 'failed' &&
+      result.processedMessages === result.totalMessages
+    ) {
       result.status =
         result.failedMessages === 0 ? 'completed' : 'completed_with_errors';
     }
@@ -279,7 +326,7 @@ export class WhatsAppImporter {
       }
 
       // Mark as sent
-      message.markAsSent(whatsappMessageId);
+      message.markAsSent();
 
       return {
         success: true,
@@ -337,10 +384,17 @@ export class WhatsAppImporter {
    * Send audio message
    */
   async _sendAudioMessage(message) {
-    const media = await this._prepareMediaFile(message.mediaPath, 'audio');
     const chat = await this.client.getChatById(message.chatId);
 
+    // If there's content (date prefix), send it as a separate text message
+    if (message.content && message.content.trim()) {
+      await chat.sendMessage(message.content + " [Audio]");
+      await this._sleep(1000); // Small 1-second delay between messages
+    }
+
+    const media = await this._prepareMediaFile(message.mediaPath, 'audio');
     const sentMessage = await chat.sendMessage(media);
+
     return sentMessage.id._serialized;
   }
 

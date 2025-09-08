@@ -57,10 +57,15 @@ export class ExecuteCommand {
       );
 
       // Initialize WhatsApp importer
-      this.importer = new WhatsAppImporter(this.config);
+      this.importer = new WhatsAppImporter(this.config, options);
 
       // Connect to WhatsApp (unless dry run)
       if (!options.dryRun) {
+        if (options.debug && options.format === 'human') {
+          console.log(
+            '🐛 Debug mode enabled - browser window will be visible with dev tools'
+          );
+        }
         await this._connectToWhatsApp(options);
       } else {
         // Setup progress monitoring for dry run too
@@ -69,6 +74,15 @@ export class ExecuteCommand {
 
       // Execute the import
       const result = await this._executeImport(plan, options);
+
+      // Check if import failed and stop execution immediately
+      if (result.status === 'failed') {
+        throw new ExecuteCommandError(
+          `Import failed: ${result.errors[0]?.error || 'Unknown error'}`,
+          15,
+          null
+        );
+      }
 
       // Output results
       this._outputResults(result, options, Date.now() - startTime);
@@ -231,10 +245,12 @@ export class ExecuteCommand {
   async _initializeProgressTracking(outputPath, planPath, plan, options) {
     try {
       if (
-        options.resume &&
         FileUtils.exists(join(outputPath, 'progress.json'))
       ) {
         this.progressTracker = await ProgressTracker.load(outputPath, planPath);
+
+        // Sync plan messages with progress tracker status
+        this._syncPlanWithProgress(plan);
 
         if (options.format === 'human') {
           const summary = this.progressTracker.getProgressSummary();
@@ -296,6 +312,27 @@ export class ExecuteCommand {
   }
 
   /**
+   * Sync plan messages with progress tracker status
+   */
+  _syncPlanWithProgress(plan) {
+    if (!this.progressTracker) return;
+
+    // Update plan message statuses based on progress records
+    for (const message of plan.messages) {
+      if (this.progressTracker.isMessageSuccessful(message.id)) {
+        // Must go through processing state first
+        message.markAsProcessing();
+        message.markAsSent();
+      } else if (this.progressTracker.isMessageFailed(message.id)) {
+        // Must go through processing state first
+        message.markAsProcessing();
+        message.markAsFailed('Previous attempt failed');
+      }
+      // Otherwise leave as 'pending'
+    }
+  }
+
+  /**
    * Setup progress monitoring
    */
   _setupProgressMonitoring(options) {
@@ -333,9 +370,13 @@ export class ExecuteCommand {
     try {
       this.isRunning = true;
 
+      // Check if we should automatically resume
+      const shouldResume = options.resume || 
+        (this.progressTracker && this.progressTracker.getProgressSummary().processedMessages > 0);
+
       const importOptions = {
         dryRun: options.dryRun || false,
-        resume: options.resume || false,
+        resume: shouldResume,
         maxRetries: this.config.maxRetries,
       };
 

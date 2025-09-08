@@ -247,13 +247,13 @@ export class PlanGenerator {
         case 'video_message':
           return 'video';
         case 'voice_message':
-          return 'audio';
+          return 'document'; // Send as document to preserve date prefix caption
         case 'document':
           // Determine based on MIME type
           if (telegramMsg.mime_type) {
             if (telegramMsg.mime_type.startsWith('image/')) return 'image';
             if (telegramMsg.mime_type.startsWith('video/')) return 'video';
-            if (telegramMsg.mime_type.startsWith('audio/')) return 'audio';
+            if (telegramMsg.mime_type.startsWith('audio/')) return 'document'; // Send as document to preserve date caption
           }
           return 'document';
         default:
@@ -268,7 +268,8 @@ export class PlanGenerator {
    * Extract content from Telegram message
    */
   _extractContent(telegramMsg) {
-    const datePrefix = `[${telegramMsg.date}]`;
+    const formattedDate = telegramMsg.date.replace('T', ' ');
+    const datePrefix = `[${formattedDate}]`;
 
     if (telegramMsg.text) {
       // Convert text entities to plain text for now
