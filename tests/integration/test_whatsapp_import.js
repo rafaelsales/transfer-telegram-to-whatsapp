@@ -24,7 +24,7 @@ describe('WhatsApp Import Execution Integration', () => {
         totalMessages: 3,
         supportedMessages: 3,
         skippedMessages: 0,
-        mediaFiles: 1
+        mediaFiles: 1,
       },
       messages: [
         {
@@ -35,7 +35,7 @@ describe('WhatsApp Import Execution Integration', () => {
           timestamp: 1735732800000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '87654321-4321-4321-b321-cba987654321',
@@ -47,7 +47,7 @@ describe('WhatsApp Import Execution Integration', () => {
           timestamp: 1735732900000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '11111111-1111-4111-a111-111111111111',
@@ -57,8 +57,8 @@ describe('WhatsApp Import Execution Integration', () => {
           timestamp: 1735733000000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ],
       skippedMessages: [],
       statistics: {
@@ -67,9 +67,9 @@ describe('WhatsApp Import Execution Integration', () => {
         totalSize: 1048576,
         dateRange: {
           earliest: '2025-01-01T12:00:00Z',
-          latest: '2025-01-01T12:03:20Z'
-        }
-      }
+          latest: '2025-01-01T12:03:20Z',
+        },
+      },
     };
   });
 
@@ -81,47 +81,53 @@ describe('WhatsApp Import Execution Integration', () => {
 
   describe('Complete Import Workflow', () => {
     it('should execute complete import with dry-run', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
+
         // Should indicate dry-run mode
-        expect(output).toContain('Execute command not yet implemented');
-        
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - Plan is loaded and validated
         // - Dry-run shows what would be sent without actually sending
         // - No WhatsApp connection required for dry-run
         // - Progress tracking shows simulation
-        
       } catch (error) {
         throw new Error(`Dry-run execution failed: ${error.message}`);
       }
     }, 20000);
 
     it('should handle WhatsApp connection simulation', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "1-2"`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - WhatsApp client initialization
         // - Authentication handling (QR code or session)
         // - Connection status verification
         // - Target chat validation
-        
       } catch (error) {
         // Expected to fail without WhatsApp connection - test should catch this gracefully
         expect(error.status).toBe(12); // WhatsApp connection error
-        expect(error.stderr || error.stdout).toMatch(/connection.*failed|connect.*whatsapp/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /connection.*failed|connect.*whatsapp/i
+        );
       }
     }, 20000);
 
@@ -135,7 +141,7 @@ describe('WhatsApp Import Execution Integration', () => {
           totalMessages: 1,
           supportedMessages: 1,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [
           {
@@ -147,8 +153,8 @@ describe('WhatsApp Import Execution Integration', () => {
             timestamp: 1735732800000,
             // sender missing
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [],
         statistics: {
@@ -157,21 +163,26 @@ describe('WhatsApp Import Execution Integration', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(invalidPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(invalidPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 10000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(11); // Import plan schema error
-        expect(error.stderr || error.stdout).toMatch(/schema.*validation|invalid.*plan/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /schema.*validation|invalid.*plan/i
+        );
       }
     });
   });
@@ -191,30 +202,34 @@ describe('WhatsApp Import Execution Integration', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
-        ]
+            status: 'pending',
+          },
+        ],
       };
 
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(planWithMissingMedia, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(planWithMissingMedia, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // Should handle gracefully in dry-run
-        expect(output).toContain('Execute command not yet implemented');
-        
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should:
         // - Detect missing media files
         // - Either fail fast or skip with warning
         // - Update progress accordingly
-        
       } catch (error) {
         // Might fail with media validation error
         if (error.status === 5) {
-          expect(error.stderr || error.stdout).toMatch(/media.*file.*not.*found/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /media.*file.*not.*found/i
+          );
         } else {
           throw new Error(`Unexpected error: ${error.message}`);
         }
@@ -222,19 +237,21 @@ describe('WhatsApp Import Execution Integration', () => {
     });
 
     it('should handle invalid target chat ID', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "invalid-chat-id" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // Should validate chat ID format
-        expect(output).toContain('Execute command not yet implemented');
-        
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should validate chat ID format
         // and fail with appropriate error code
-        
       } catch (error) {
         // Expected behavior when validation is implemented
         if (error.status === 16) {
@@ -246,21 +263,23 @@ describe('WhatsApp Import Execution Integration', () => {
 
   describe('Progress Tracking Simulation', () => {
     it('should simulate progress tracking in dry-run', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - Progress file creation
         // - Progress updates for each message
         // - Final progress summary
         // - No actual WhatsApp messages sent
-        
       } catch (error) {
         throw new Error(`Progress tracking test failed: ${error.message}`);
       }
@@ -273,10 +292,10 @@ describe('WhatsApp Import Execution Integration', () => {
         telegramId: i + 1,
         type: 'text',
         content: `Message ${i + 1} content`,
-        timestamp: 1735732800000 + (i * 60000), // 1 minute apart
+        timestamp: 1735732800000 + i * 60000, // 1 minute apart
         sender: 'Test User',
         chatId: 'test@c.us',
-        status: 'pending'
+        status: 'pending',
       }));
 
       const largePlan = {
@@ -286,7 +305,7 @@ describe('WhatsApp Import Execution Integration', () => {
           totalMessages: 50,
           supportedMessages: 50,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: largeMessages,
         statistics: {
@@ -295,25 +314,27 @@ describe('WhatsApp Import Execution Integration', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:49:00Z'
-          }
-        }
+            latest: '2025-01-01T12:49:00Z',
+          },
+        },
       };
 
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(largePlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(largePlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 20000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should handle large plans efficiently
         // - Memory usage should be reasonable
         // - Progress updates should be regular
         // - Performance should be acceptable
-        
       } catch (error) {
         throw new Error(`Large plan test failed: ${error.message}`);
       }
@@ -322,18 +343,20 @@ describe('WhatsApp Import Execution Integration', () => {
 
   describe('Output Format Tests', () => {
     beforeEach(() => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
     });
 
     it('should output human format during execution', async () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // Should contain human-readable symbols
         expect(output).toMatch(/[✓]/);
-        
       } catch (error) {
         throw new Error(`Human format test failed: ${error.message}`);
       }
@@ -341,13 +364,12 @@ describe('WhatsApp Import Execution Integration', () => {
 
     it('should output JSON format when requested', async () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run --format json`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // When implemented, should be valid JSON
-        expect(output).toContain('Execute command not yet implemented');
-        
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`JSON format test failed: ${error.message}`);
       }

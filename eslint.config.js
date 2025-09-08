@@ -1,8 +1,14 @@
 import js from '@eslint/js';
+import prettier from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
+  prettierConfig,
   {
+    plugins: {
+      prettier: prettier,
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -21,7 +27,8 @@ export default [
       'no-var': 'error',
       'arrow-spacing': 'error',
       'object-shorthand': 'error',
-      'prefer-arrow-callback': 'error'
+      'prefer-arrow-callback': 'error',
+      'prettier/prettier': 'error'
     },
     files: ['src/**/*.js', 'tests/**/*.js']
   },

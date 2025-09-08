@@ -21,10 +21,10 @@ describe('Rate Limiting Behavior Integration', () => {
       telegramId: i + 1,
       type: 'text',
       content: `Rate limit test message ${i + 1}`,
-      timestamp: 1735732800000 + (i * 30000), // 30 seconds apart
+      timestamp: 1735732800000 + i * 30000, // 30 seconds apart
       sender: 'Test User',
       chatId: 'test@c.us',
-      status: 'pending'
+      status: 'pending',
     }));
 
     validImportPlan = {
@@ -36,7 +36,7 @@ describe('Rate Limiting Behavior Integration', () => {
         totalMessages: 10,
         supportedMessages: 10,
         skippedMessages: 0,
-        mediaFiles: 0
+        mediaFiles: 0,
       },
       messages,
       skippedMessages: [],
@@ -46,9 +46,9 @@ describe('Rate Limiting Behavior Integration', () => {
         totalSize: 0,
         dateRange: {
           earliest: '2025-01-01T12:00:00Z',
-          latest: '2025-01-01T12:04:30Z'
-        }
-      }
+          latest: '2025-01-01T12:04:30Z',
+        },
+      },
     };
   });
 
@@ -60,62 +60,87 @@ describe('Rate Limiting Behavior Integration', () => {
 
   describe('Sleep Range Configuration', () => {
     it('should accept valid sleep range formats', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Test various valid formats
       const validSleepRanges = ['1-5', '3-10', '5', '2-2'];
 
       for (const sleepRange of validSleepRanges) {
         const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "${sleepRange}" --dry-run`;
-        
+
         try {
-          const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-          expect(output).toContain('Execute command not yet implemented');
-          
+          const output = execSync(command, {
+            encoding: 'utf8',
+            timeout: 10000,
+          });
+          expect(output).toContain(
+            'DRY RUN MODE - No messages will actually be sent'
+          );
+
           // When implemented, should test:
           // - Sleep range is parsed correctly
           // - Random delays within range are generated
           // - Total execution time estimates are accurate
-          
         } catch (error) {
-          throw new Error(`Sleep range "${sleepRange}" should be valid: ${error.message}`);
+          throw new Error(
+            `Sleep range "${sleepRange}" should be valid: ${error.message}`
+          );
         }
       }
     }, 15000);
 
     it('should reject invalid sleep range formats', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Test various invalid formats
-      const invalidSleepRanges = ['invalid', '5-3', '-1', '0', '10-5', 'abc-def'];
+      const invalidSleepRanges = [
+        'invalid',
+        '5-3',
+        '-1',
+        '0',
+        '10-5',
+        'abc-def',
+      ];
 
       for (const sleepRange of invalidSleepRanges) {
         const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "${sleepRange}" --dry-run`;
-        
+
         try {
           execSync(command, { encoding: 'utf8', timeout: 5000 });
           throw new Error(`Sleep range "${sleepRange}" should be invalid`);
         } catch (error) {
           expect(error.status).toBe(16); // Invalid argument value
-          expect(error.stderr || error.stdout).toMatch(/invalid.*sleep.*range/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /invalid.*sleep.*range/i
+          );
         }
       }
     }, 15000);
 
     it('should use default sleep range when not specified', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Default range 3-10 seconds is used
         // - Execution time estimates reflect default range
-        
       } catch (error) {
         throw new Error(`Default sleep range test failed: ${error.message}`);
       }
@@ -124,69 +149,81 @@ describe('Rate Limiting Behavior Integration', () => {
 
   describe('Rate Limiting Simulation', () => {
     it('should simulate rate limiting in dry-run mode', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "1-2" --dry-run`;
-      
+
       const startTime = Date.now();
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 25000 });
-        
+
         const endTime = Date.now();
         const executionTime = endTime - startTime;
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Dry-run simulates delays between messages
         // - Total execution time reflects rate limiting
         // - Progress shows realistic timing
         // - No actual delays in dry-run (should be much faster)
-        
+
         // For now, just verify the command completes quickly
         expect(executionTime).toBeLessThan(5000); // Should complete in under 5 seconds for dry-run
-        
       } catch (error) {
         throw new Error(`Rate limiting simulation failed: ${error.message}`);
       }
     }, 30000);
 
     it('should calculate accurate time estimates', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "5-5" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - ETA calculations are accurate
         // - Progress updates show realistic timing
         // - Fixed sleep time (5-5) gives predictable estimates
-        
       } catch (error) {
         throw new Error(`Time estimation test failed: ${error.message}`);
       }
     });
 
     it('should handle variable delay ranges properly', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "2-8" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Random delays are generated within range
         // - Average delay approximates range midpoint
         // - Progress updates account for variability
-        
       } catch (error) {
         throw new Error(`Variable delay test failed: ${error.message}`);
       }
@@ -195,25 +232,31 @@ describe('Rate Limiting Behavior Integration', () => {
 
   describe('WhatsApp Rate Limit Handling', () => {
     it('should detect and handle rate limit responses', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "1-1" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - WhatsApp rate limit errors are detected
         // - Exponential backoff is applied
         // - Retry logic respects rate limits
         // - Progress tracking accounts for delays
-        
       } catch (error) {
         // Might fail with rate limit error code when implemented
         if (error.status === 14) {
-          expect(error.stderr || error.stdout).toMatch(/rate.*limit.*exceeded/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /rate.*limit.*exceeded/i
+          );
         } else {
           throw new Error(`Rate limit handling test failed: ${error.message}`);
         }
@@ -221,29 +264,36 @@ describe('Rate Limiting Behavior Integration', () => {
     });
 
     it('should implement exponential backoff for failures', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create progress showing previous failures
       const progressRecords = [
         '{"messageId":"00000001-1234-4123-a123-123456789abc","telegramId":1,"status":"failed","timestamp":1735732800000,"retryCount":1,"errorMessage":"Rate limit exceeded"}',
         '{"messageId":"00000002-1234-4123-a123-123456789abc","telegramId":2,"status":"failed","timestamp":1735732830000,"retryCount":2,"errorMessage":"Rate limit exceeded"}',
-        '{"messageId":"00000003-1234-4123-a123-123456789abc","telegramId":3,"status":"failed","timestamp":1735732860000,"retryCount":3,"errorMessage":"Rate limit exceeded"}'
+        '{"messageId":"00000003-1234-4123-a123-123456789abc","telegramId":3,"status":"failed","timestamp":1735732860000,"retryCount":3,"errorMessage":"Rate limit exceeded"}',
       ];
 
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), progressRecords.join('\n'));
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        progressRecords.join('\n')
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --resume --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Retry attempts use exponential backoff
         // - Higher retry counts result in longer delays
         // - Max retry limits are respected
-        
       } catch (error) {
         throw new Error(`Exponential backoff test failed: ${error.message}`);
       }
@@ -256,10 +306,10 @@ describe('Rate Limiting Behavior Integration', () => {
         telegramId: i + 1,
         type: 'text',
         content: `Daily limit test message ${i + 1}`,
-        timestamp: 1735732800000 + (i * 1000),
+        timestamp: 1735732800000 + i * 1000,
         sender: 'Test User',
         chatId: 'test@c.us',
-        status: 'pending'
+        status: 'pending',
       }));
 
       const largePlan = {
@@ -267,29 +317,35 @@ describe('Rate Limiting Behavior Integration', () => {
         metadata: {
           ...validImportPlan.metadata,
           totalMessages: 1500,
-          supportedMessages: 1500
+          supportedMessages: 1500,
         },
-        messages: largeMessages
+        messages: largeMessages,
       };
 
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(largePlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(largePlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "1-1" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 20000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Daily limit warnings are shown
         // - Execution can pause at daily limit
         // - Resume capability for multi-day imports
-        
       } catch (error) {
         // Might warn about daily limits when implemented
         if (error.status === 14) {
-          expect(error.stderr || error.stdout).toMatch(/daily.*message.*limit/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /daily.*message.*limit/i
+          );
         } else {
           throw new Error(`Daily limits test failed: ${error.message}`);
         }
@@ -299,41 +355,49 @@ describe('Rate Limiting Behavior Integration', () => {
 
   describe('Performance and Timing', () => {
     it('should provide accurate progress estimates', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "3-3" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - ETA calculations are realistic
         // - Progress percentage is accurate
         // - Rate information is displayed
         // - Time remaining updates correctly
-        
       } catch (error) {
         throw new Error(`Progress estimates test failed: ${error.message}`);
       }
     });
 
     it('should handle burst vs sustained rate limiting', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "10-15" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Conservative rate limiting prevents issues
         // - Burst sending is avoided
         // - Sustained rate is maintained over time
-        
       } catch (error) {
         throw new Error(`Burst rate limiting test failed: ${error.message}`);
       }
@@ -350,7 +414,7 @@ describe('Rate Limiting Behavior Integration', () => {
           timestamp: 1735732800000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '00000002-1234-4123-a123-123456789abc',
@@ -362,7 +426,7 @@ describe('Rate Limiting Behavior Integration', () => {
           timestamp: 1735732830000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '00000003-1234-4123-a123-123456789abc',
@@ -374,8 +438,8 @@ describe('Rate Limiting Behavior Integration', () => {
           timestamp: 1735732860000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ];
 
       const mixedPlan = {
@@ -384,27 +448,33 @@ describe('Rate Limiting Behavior Integration', () => {
           ...validImportPlan.metadata,
           totalMessages: 3,
           supportedMessages: 3,
-          mediaFiles: 2
+          mediaFiles: 2,
         },
-        messages: mixedMessages
+        messages: mixedMessages,
       };
 
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(mixedPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(mixedPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "3-5" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain(
+          'DRY RUN MODE - No messages will actually be sent'
+        );
+
         // When implemented, should test:
         // - Different message types may have different delays
         // - Media uploads might need longer pauses
         // - Rate limiting adapts to message complexity
-        
       } catch (error) {
-        throw new Error(`Message type optimization test failed: ${error.message}`);
+        throw new Error(
+          `Message type optimization test failed: ${error.message}`
+        );
       }
     });
   });

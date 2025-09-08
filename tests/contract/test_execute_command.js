@@ -25,7 +25,7 @@ describe('Execute Command CLI Contract', () => {
         totalMessages: 2,
         supportedMessages: 2,
         skippedMessages: 0,
-        mediaFiles: 0
+        mediaFiles: 0,
       },
       messages: [
         {
@@ -36,7 +36,7 @@ describe('Execute Command CLI Contract', () => {
           timestamp: 1735732800000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '87654321-4321-4321-b321-cba987654321',
@@ -46,8 +46,8 @@ describe('Execute Command CLI Contract', () => {
           timestamp: 1735732900000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ],
       skippedMessages: [],
       statistics: {
@@ -56,9 +56,9 @@ describe('Execute Command CLI Contract', () => {
         totalSize: 0,
         dateRange: {
           earliest: '2025-01-01T12:00:00Z',
-          latest: '2025-01-01T12:01:40Z'
-        }
-      }
+          latest: '2025-01-01T12:01:40Z',
+        },
+      },
     };
   });
 
@@ -70,13 +70,16 @@ describe('Execute Command CLI Contract', () => {
 
   describe('Success Cases', () => {
     it('should execute import with valid plan and return exit code 0', () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us"`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
         // Exit code 0 is implied by successful execSync
       } catch (error) {
         throw new Error(`Command failed: ${error.message}`);
@@ -84,26 +87,32 @@ describe('Execute Command CLI Contract', () => {
     });
 
     it('should accept all valid options', () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "5-15" --dry-run --resume --format json --log-level debug`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`Command with all options failed: ${error.message}`);
       }
     });
 
     it('should accept dry-run option', () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`Dry run command failed: ${error.message}`);
       }
@@ -114,48 +123,57 @@ describe('Execute Command CLI Contract', () => {
     it('should return exit code 10 for non-existent import plan folder', () => {
       const nonExistentPath = join(TEST_DIR, 'non-existent');
       const command = `node ${CLI_PATH} execute ${nonExistentPath} --target-chat "test@c.us"`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(10);
-        expect(error.stderr || error.stdout).toMatch(/not found|does not exist/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /not found|does not exist/i
+        );
       }
     });
 
     it('should return exit code 10 for missing import-plan.json', () => {
       // Plan dir exists but no import-plan.json
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us"`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(10);
-        expect(error.stderr || error.stdout).toMatch(/import-plan\.json.*not found/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /import-plan\.json.*not found/i
+        );
       }
     });
 
     it('should return exit code 11 for invalid import plan format', () => {
       writeFileSync(join(testPlanDir, 'import-plan.json'), '{ invalid json');
-      
+
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us"`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(11);
-        expect(error.stderr || error.stdout).toMatch(/invalid.*format|schema.*validation/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /invalid.*format|schema.*validation/i
+        );
       }
     });
 
     it('should return exit code 15 for missing target-chat argument', () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
-      
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
+
       const command = `node ${CLI_PATH} execute ${testPlanDir}`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
@@ -167,7 +185,7 @@ describe('Execute Command CLI Contract', () => {
 
     it('should require import-plan-path argument', () => {
       const command = `node ${CLI_PATH} execute --target-chat "test@c.us"`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
@@ -178,10 +196,13 @@ describe('Execute Command CLI Contract', () => {
     });
 
     it('should validate sleep range format', () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
-      
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
+
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "invalid"`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 5000 });
         throw new Error('Command should have failed');
@@ -194,12 +215,15 @@ describe('Execute Command CLI Contract', () => {
 
   describe('Output Format Tests', () => {
     beforeEach(() => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
     });
 
     it('should output human format by default', () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us"`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
         // Should contain human-readable symbols like ✓
@@ -211,12 +235,12 @@ describe('Execute Command CLI Contract', () => {
 
     it('should output JSON format when requested', () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --format json`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
         // When implemented, should be valid JSON
         // For now, just check that format option is accepted
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`JSON format test failed: ${error.message}`);
       }
@@ -225,15 +249,18 @@ describe('Execute Command CLI Contract', () => {
 
   describe('Sleep Range Validation', () => {
     beforeEach(() => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
     });
 
     it('should accept valid sleep range format', () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "5-10"`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`Valid sleep range rejected: ${error.message}`);
       }
@@ -241,10 +268,10 @@ describe('Execute Command CLI Contract', () => {
 
     it('should accept single number as sleep range', () => {
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --sleep "7"`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        expect(output).toContain('Execute command not yet implemented');
+        expect(output).toContain('Import execution completed!');
       } catch (error) {
         throw new Error(`Single number sleep range rejected: ${error.message}`);
       }
@@ -254,7 +281,7 @@ describe('Execute Command CLI Contract', () => {
   describe('Help Tests', () => {
     it('should show help for execute command', () => {
       const command = `node ${CLI_PATH} execute --help`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 5000 });
         expect(output).toMatch(/Execute WhatsApp import/i);

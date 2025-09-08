@@ -24,7 +24,7 @@ describe('Idempotent Resume Functionality Integration', () => {
         totalMessages: 5,
         supportedMessages: 5,
         skippedMessages: 0,
-        mediaFiles: 0
+        mediaFiles: 0,
       },
       messages: [
         {
@@ -35,7 +35,7 @@ describe('Idempotent Resume Functionality Integration', () => {
           timestamp: 1735732800000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '12345678-1234-4123-a123-123456789002',
@@ -45,7 +45,7 @@ describe('Idempotent Resume Functionality Integration', () => {
           timestamp: 1735732860000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '12345678-1234-4123-a123-123456789003',
@@ -55,7 +55,7 @@ describe('Idempotent Resume Functionality Integration', () => {
           timestamp: 1735732920000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '12345678-1234-4123-a123-123456789004',
@@ -65,7 +65,7 @@ describe('Idempotent Resume Functionality Integration', () => {
           timestamp: 1735732980000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: '12345678-1234-4123-a123-123456789005',
@@ -75,8 +75,8 @@ describe('Idempotent Resume Functionality Integration', () => {
           timestamp: 1735733040000,
           sender: 'Test User',
           chatId: 'test@c.us',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ],
       skippedMessages: [],
       statistics: {
@@ -85,9 +85,9 @@ describe('Idempotent Resume Functionality Integration', () => {
         totalSize: 0,
         dateRange: {
           earliest: '2025-01-01T12:00:00Z',
-          latest: '2025-01-01T12:04:00Z'
-        }
-      }
+          latest: '2025-01-01T12:04:00Z',
+        },
+      },
     };
   });
 
@@ -99,16 +99,22 @@ describe('Idempotent Resume Functionality Integration', () => {
 
   describe('Resume from Progress', () => {
     it('should resume from existing progress file automatically', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create mock progress file showing partial completion
       const progressRecords = [
         '{"messageId":"12345678-1234-4123-a123-123456789001","telegramId":1,"status":"sent","timestamp":1735732800000,"retryCount":0,"sentMessageId":"whatsapp_msg_1"}',
         '{"messageId":"12345678-1234-4123-a123-123456789002","telegramId":2,"status":"sent","timestamp":1735732860000,"retryCount":0,"sentMessageId":"whatsapp_msg_2"}',
-        '{"messageId":"12345678-1234-4123-a123-123456789003","telegramId":3,"status":"failed","timestamp":1735732920000,"retryCount":3,"errorMessage":"Rate limit exceeded"}'
+        '{"messageId":"12345678-1234-4123-a123-123456789003","telegramId":3,"status":"failed","timestamp":1735732920000,"retryCount":3,"errorMessage":"Rate limit exceeded"}',
       ];
 
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), progressRecords.join('\n'));
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        progressRecords.join('\n')
+      );
 
       // Create progress summary
       const progressSummary = {
@@ -120,45 +126,53 @@ describe('Idempotent Resume Functionality Integration', () => {
         successfulMessages: 2,
         failedMessages: 1,
         currentPosition: 3,
-        status: 'paused'
+        status: 'paused',
       };
 
-      writeFileSync(join(testPlanDir, 'progress-summary.json'), JSON.stringify(progressSummary, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'progress-summary.json'),
+        JSON.stringify(progressSummary, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - Progress file is detected and loaded
         // - Execution resumes from message 4 (after last processed)
         // - Previously sent messages are not re-sent
         // - Failed messages can be retried
-        
       } catch (error) {
         throw new Error(`Resume from progress failed: ${error.message}`);
       }
     }, 20000);
 
     it('should handle resume with --resume flag explicitly', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create complete progress showing all messages sent
-      const progressRecords = validImportPlan.messages.map((msg, i) => 
+      const progressRecords = validImportPlan.messages.map((msg, i) =>
         JSON.stringify({
           messageId: msg.id,
           telegramId: msg.telegramId,
           status: 'sent',
           timestamp: msg.timestamp,
           retryCount: 0,
-          sentMessageId: `whatsapp_msg_${i + 1}`
+          sentMessageId: `whatsapp_msg_${i + 1}`,
         })
       );
 
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), progressRecords.join('\n'));
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        progressRecords.join('\n')
+      );
 
       const progressSummary = {
         planPath: join(testPlanDir, 'import-plan.json'),
@@ -169,51 +183,60 @@ describe('Idempotent Resume Functionality Integration', () => {
         successfulMessages: 5,
         failedMessages: 0,
         currentPosition: 5,
-        status: 'completed'
+        status: 'completed',
       };
 
-      writeFileSync(join(testPlanDir, 'progress-summary.json'), JSON.stringify(progressSummary, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'progress-summary.json'),
+        JSON.stringify(progressSummary, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --resume --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - Detects that import is already complete
         // - Shows summary of previous execution
         // - No new messages are processed
         // - Exit with success status
-        
       } catch (error) {
         throw new Error(`Explicit resume test failed: ${error.message}`);
       }
     }, 20000);
 
     it('should handle corrupted progress file gracefully', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create corrupted progress file
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), 'invalid json line\n{"valid":"json"}\ncorrupted line again');
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        'invalid json line\n{"valid":"json"}\ncorrupted line again'
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --resume --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should:
         // - Detect corrupted progress file
         // - Either repair automatically or prompt user
         // - Fall back to clean start if necessary
-        
       } catch (error) {
         // Might fail with progress file error
         if (error.status) {
-          expect(error.stderr || error.stdout).toMatch(/progress.*corrupt|invalid.*progress/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /progress.*corrupt|invalid.*progress/i
+          );
         } else {
           throw new Error(`Corrupted progress test failed: ${error.message}`);
         }
@@ -223,43 +246,57 @@ describe('Idempotent Resume Functionality Integration', () => {
 
   describe('Idempotent Operations', () => {
     it('should not duplicate messages on multiple runs', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // First execution (simulated)
       const command1 = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
-        const output1 = execSync(command1, { encoding: 'utf8', timeout: 15000 });
+        const output1 = execSync(command1, {
+          encoding: 'utf8',
+          timeout: 15000,
+        });
         expect(output1).toContain('Execute command not yet implemented');
-        
+
         // Second execution should resume, not duplicate
         const command2 = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-        const output2 = execSync(command2, { encoding: 'utf8', timeout: 15000 });
-        
+        const output2 = execSync(command2, {
+          encoding: 'utf8',
+          timeout: 15000,
+        });
+
         expect(output2).toContain('Execute command not yet implemented');
-        
+
         // When implemented, should test:
         // - Second run detects existing progress
         // - No messages are duplicated
         // - Progress continues from last position
-        
       } catch (error) {
         throw new Error(`Idempotent operations test failed: ${error.message}`);
       }
     }, 25000);
 
     it('should handle partial failures gracefully', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create progress file with mixed success/failure states
       const progressRecords = [
         '{"messageId":"12345678-1234-4123-a123-123456789001","telegramId":1,"status":"sent","timestamp":1735732800000,"retryCount":0,"sentMessageId":"whatsapp_msg_1"}',
         '{"messageId":"12345678-1234-4123-a123-123456789002","telegramId":2,"status":"failed","timestamp":1735732860000,"retryCount":2,"errorMessage":"Network timeout"}',
         '{"messageId":"12345678-1234-4123-a123-123456789003","telegramId":3,"status":"sent","timestamp":1735732920000,"retryCount":1,"sentMessageId":"whatsapp_msg_3"}',
-        '{"messageId":"12345678-1234-4123-a123-123456789004","telegramId":4,"status":"failed","timestamp":1735732980000,"retryCount":3,"errorMessage":"Rate limit exceeded"}'
+        '{"messageId":"12345678-1234-4123-a123-123456789004","telegramId":4,"status":"failed","timestamp":1735732980000,"retryCount":3,"errorMessage":"Rate limit exceeded"}',
       ];
 
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), progressRecords.join('\n'));
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        progressRecords.join('\n')
+      );
 
       const progressSummary = {
         planPath: join(testPlanDir, 'import-plan.json'),
@@ -270,24 +307,26 @@ describe('Idempotent Resume Functionality Integration', () => {
         successfulMessages: 2,
         failedMessages: 2,
         currentPosition: 4,
-        status: 'failed'
+        status: 'failed',
       };
 
-      writeFileSync(join(testPlanDir, 'progress-summary.json'), JSON.stringify(progressSummary, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'progress-summary.json'),
+        JSON.stringify(progressSummary, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --resume --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - Successfully sent messages are skipped
         // - Failed messages can be retried
         // - Remaining unsent messages are processed
         // - Progress is updated correctly
-        
       } catch (error) {
         throw new Error(`Partial failures test failed: ${error.message}`);
       }
@@ -296,72 +335,83 @@ describe('Idempotent Resume Functionality Integration', () => {
 
   describe('Progress File Management', () => {
     it('should create progress files with correct format', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - progress.jsonl is created with JSONL format
         // - progress-summary.json is created with valid schema
         // - Files are created atomically
         // - File permissions are appropriate
-        
       } catch (error) {
         throw new Error(`Progress file creation test failed: ${error.message}`);
       }
     });
 
     it('should handle concurrent execution attempts', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // This test would need more sophisticated implementation to actually test concurrency
       // For now, just verify the command structure
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should test:
         // - File locking prevents concurrent execution
         // - Clear error message when already running
         // - Cleanup of stale locks
-        
       } catch (error) {
         throw new Error(`Concurrent execution test failed: ${error.message}`);
       }
     });
 
     it('should validate progress file schema on load', async () => {
-      writeFileSync(join(testPlanDir, 'import-plan.json'), JSON.stringify(validImportPlan, null, 2));
+      writeFileSync(
+        join(testPlanDir, 'import-plan.json'),
+        JSON.stringify(validImportPlan, null, 2)
+      );
 
       // Create progress file with invalid schema
       const invalidProgressRecords = [
         '{"messageId":"invalid-uuid-format","telegramId":1,"status":"sent","timestamp":1735732800000,"retryCount":0}',
-        '{"messageId":"12345678-1234-4123-a123-123456789002","telegramId":"not-a-number","status":"sent","timestamp":1735732860000,"retryCount":0}'
+        '{"messageId":"12345678-1234-4123-a123-123456789002","telegramId":"not-a-number","status":"sent","timestamp":1735732860000,"retryCount":0}',
       ];
 
-      writeFileSync(join(testPlanDir, 'progress.jsonl'), invalidProgressRecords.join('\n'));
+      writeFileSync(
+        join(testPlanDir, 'progress.jsonl'),
+        invalidProgressRecords.join('\n')
+      );
 
       const command = `node ${CLI_PATH} execute ${testPlanDir} --target-chat "test@c.us" --resume --dry-run`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
-        expect(output).toContain('Execute command not yet implemented');
-        
+
+        expect(output).toContain('Import execution completed!');
+
         // When implemented, should validate and handle gracefully
-        
       } catch (error) {
         // Should fail with schema validation error when implemented
         if (error.status) {
-          expect(error.stderr || error.stdout).toMatch(/progress.*schema|invalid.*progress.*format/i);
+          expect(error.stderr || error.stdout).toMatch(
+            /progress.*schema|invalid.*progress.*format/i
+          );
         }
       }
     });

@@ -11,18 +11,20 @@ describe('ImportPlan Schema Contract', () => {
 
   beforeAll(() => {
     // Load the JSON Schema
-    const schemaPath = resolve('specs/001-this-project-is/contracts/file-formats.json');
+    const schemaPath = resolve(
+      'specs/001-this-project-is/contracts/file-formats.json'
+    );
     const schemaContent = JSON.parse(readFileSync(schemaPath, 'utf8'));
-    
+
     ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
-    
+
     // Add schema and compile validator
     ajv.addSchema(schemaContent);
     schema = schemaContent.definitions.ImportPlan;
     validateImportPlan = ajv.compile({
       ...schema,
-      definitions: schemaContent.definitions
+      definitions: schemaContent.definitions,
     });
   });
 
@@ -37,7 +39,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 1,
           supportedMessages: 1,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [
           {
@@ -48,8 +50,8 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [],
         statistics: {
@@ -58,9 +60,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(validPlan);
@@ -80,7 +82,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 2,
           supportedMessages: 2,
           skippedMessages: 0,
-          mediaFiles: 1
+          mediaFiles: 1,
         },
         messages: [
           {
@@ -91,7 +93,7 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
+            status: 'pending',
           },
           {
             id: '87654321-4321-4321-b321-cba987654321',
@@ -103,8 +105,8 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732900000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [],
         statistics: {
@@ -113,9 +115,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 1048576,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:01:40Z'
-          }
-        }
+            latest: '2025-01-01T12:01:40Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(planWithMedia);
@@ -135,7 +137,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 2,
           supportedMessages: 1,
           skippedMessages: 1,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [
           {
@@ -146,8 +148,8 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [
           {
@@ -161,10 +163,11 @@ describe('ImportPlan Schema Contract', () => {
               text: '',
               text_entities: [],
               action: 'chat_created',
-              actor: 'Test User'
+              actor: 'Test User',
             },
-            explanation: 'Service messages are not supported for WhatsApp import'
-          }
+            explanation:
+              'Service messages are not supported for WhatsApp import',
+          },
         ],
         statistics: {
           messageTypes: { text: 1 },
@@ -172,9 +175,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:01:40Z'
-          }
-        }
+            latest: '2025-01-01T12:01:40Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(planWithSkipped);
@@ -196,7 +199,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 0,
           supportedMessages: 0,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [],
         skippedMessages: [],
@@ -206,9 +209,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(invalidPlan);
@@ -219,8 +222,8 @@ describe('ImportPlan Schema Contract', () => {
             instancePath: '',
             schemaPath: '#/required',
             keyword: 'required',
-            params: { missingProperty: 'version' }
-          })
+            params: { missingProperty: 'version' },
+          }),
         ])
       );
     });
@@ -235,7 +238,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 0,
           supportedMessages: 0,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [],
         skippedMessages: [],
@@ -245,9 +248,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(invalidPlan);
@@ -256,8 +259,8 @@ describe('ImportPlan Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/version',
-            schemaPath: '#/properties/version/pattern'
-          })
+            schemaPath: '#/properties/version/pattern',
+          }),
         ])
       );
     });
@@ -272,7 +275,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 1,
           supportedMessages: 1,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [
           {
@@ -283,8 +286,8 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [],
         statistics: {
@@ -293,9 +296,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(invalidPlan);
@@ -304,8 +307,8 @@ describe('ImportPlan Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/messages/0/id',
-            schemaPath: '#/definitions/WhatsAppMessage/properties/id/pattern'
-          })
+            schemaPath: '#/definitions/WhatsAppMessage/properties/id/pattern',
+          }),
         ])
       );
     });
@@ -320,7 +323,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 1,
           supportedMessages: 1,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [
           {
@@ -331,8 +334,8 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'invalid-status'
-          }
+            status: 'invalid-status',
+          },
         ],
         skippedMessages: [],
         statistics: {
@@ -341,9 +344,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(invalidPlan);
@@ -352,8 +355,8 @@ describe('ImportPlan Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/messages/0/status',
-            schemaPath: '#/definitions/WhatsAppMessage/properties/status/enum'
-          })
+            schemaPath: '#/definitions/WhatsAppMessage/properties/status/enum',
+          }),
         ])
       );
     });
@@ -368,7 +371,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: -1, // Invalid negative value
           supportedMessages: 0,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [],
         skippedMessages: [],
@@ -378,17 +381,17 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: -100, // Invalid negative value
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(invalidPlan);
       expect(isValid).toBe(false);
       expect(validateImportPlan.errors.length).toBeGreaterThan(0);
-      
-      const negativeValueErrors = validateImportPlan.errors.filter(err => 
-        err.keyword === 'minimum'
+
+      const negativeValueErrors = validateImportPlan.errors.filter(
+        err => err.keyword === 'minimum'
       );
       expect(negativeValueErrors.length).toBeGreaterThan(0);
     });
@@ -405,7 +408,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 0,
           supportedMessages: 0,
           skippedMessages: 0,
-          mediaFiles: 0
+          mediaFiles: 0,
         },
         messages: [],
         skippedMessages: [],
@@ -415,9 +418,9 @@ describe('ImportPlan Schema Contract', () => {
           totalSize: 0,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:00:00Z'
-          }
-        }
+            latest: '2025-01-01T12:00:00Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(emptyPlan);
@@ -437,7 +440,7 @@ describe('ImportPlan Schema Contract', () => {
           totalMessages: 5,
           supportedMessages: 5,
           skippedMessages: 0,
-          mediaFiles: 4
+          mediaFiles: 4,
         },
         messages: [
           {
@@ -448,7 +451,7 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732800000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
+            status: 'pending',
           },
           {
             id: '12345678-1234-4123-a123-123456789002',
@@ -460,7 +463,7 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735732900000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
+            status: 'pending',
           },
           {
             id: '12345678-1234-4123-a123-123456789003',
@@ -472,7 +475,7 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735733000000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
+            status: 'pending',
           },
           {
             id: '12345678-1234-4123-a123-123456789004',
@@ -484,7 +487,7 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735733100000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
+            status: 'pending',
           },
           {
             id: '12345678-1234-4123-a123-123456789005',
@@ -496,19 +499,24 @@ describe('ImportPlan Schema Contract', () => {
             timestamp: 1735733200000,
             sender: 'Test User',
             chatId: 'test@c.us',
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         ],
         skippedMessages: [],
         statistics: {
           messageTypes: { text: 1, image: 1, video: 1, audio: 1, document: 1 },
-          mediaTypes: { image_jpeg: 1, video_mp4: 1, audio_ogg: 1, application_pdf: 1 },
+          mediaTypes: {
+            image_jpeg: 1,
+            video_mp4: 1,
+            audio_ogg: 1,
+            application_pdf: 1,
+          },
           totalSize: 10485760,
           dateRange: {
             earliest: '2025-01-01T12:00:00Z',
-            latest: '2025-01-01T12:06:40Z'
-          }
-        }
+            latest: '2025-01-01T12:06:40Z',
+          },
+        },
       };
 
       const isValid = validateImportPlan(planWithAllTypes);

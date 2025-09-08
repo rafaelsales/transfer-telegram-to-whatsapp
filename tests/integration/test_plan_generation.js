@@ -14,7 +14,7 @@ describe('Plan Generation Workflow Integration', () => {
   beforeEach(() => {
     testExportDir = join(TEST_DIR, 'export');
     testOutputDir = join(TEST_DIR, 'output');
-    
+
     mkdirSync(testExportDir, { recursive: true });
     mkdirSync(testOutputDir, { recursive: true });
   });
@@ -41,9 +41,7 @@ describe('Plan Generation Workflow Integration', () => {
             from: 'Alice Smith',
             from_id: 'user987654321',
             text: 'Hello! How are you?',
-            text_entities: [
-              { type: 'plain', text: 'Hello! How are you?' }
-            ]
+            text_entities: [{ type: 'plain', text: 'Hello! How are you?' }],
           },
           {
             id: 2,
@@ -52,10 +50,10 @@ describe('Plan Generation Workflow Integration', () => {
             date_unixtime: '1735732890',
             from: 'Bob Johnson',
             from_id: 'user123456789',
-            text: 'I\'m doing great! Thanks for asking.',
+            text: "I'm doing great! Thanks for asking.",
             text_entities: [
-              { type: 'plain', text: 'I\'m doing great! Thanks for asking.' }
-            ]
+              { type: 'plain', text: "I'm doing great! Thanks for asking." },
+            ],
           },
           {
             id: 3,
@@ -66,28 +64,30 @@ describe('Plan Generation Workflow Integration', () => {
             actor_id: 'user987654321',
             action: 'pin_message',
             text: '',
-            text_entities: []
-          }
-        ]
+            text_entities: [],
+          },
+        ],
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(telegramExport, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(telegramExport, null, 2)
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir} --output ${testOutputDir}`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
+
         // Should contain success indicators (when implemented)
-        expect(output).toContain('Plan generation not yet implemented');
-        
+        expect(output).toContain('Import plan generated successfully!');
+
         // When implemented, should test:
         // - import-plan.json exists and is valid
         // - skipped-messages.json contains service message
         // - Statistics match expected values
         // expect(existsSync(join(testOutputDir, 'import-plan.json'))).toBe(true);
         // expect(existsSync(join(testOutputDir, 'skipped-messages.json'))).toBe(true);
-        
       } catch (error) {
         throw new Error(`Plan generation workflow failed: ${error.message}`);
       }
@@ -108,13 +108,11 @@ describe('Plan Generation Workflow Integration', () => {
             from: 'Alice Smith',
             from_id: 'user987654321',
             text: 'Check out this photo!',
-            text_entities: [
-              { type: 'plain', text: 'Check out this photo!' }
-            ],
+            text_entities: [{ type: 'plain', text: 'Check out this photo!' }],
             photo: 'photos/photo_1_@2x.jpg',
             photo_file_size: 1048576,
             width: 1920,
-            height: 1080
+            height: 1080,
           },
           {
             id: 2,
@@ -128,7 +126,7 @@ describe('Plan Generation Workflow Integration', () => {
             file: 'files/document_2.pdf',
             file_size: 2097152,
             media_type: 'document',
-            mime_type: 'application/pdf'
+            mime_type: 'application/pdf',
           },
           {
             id: 3,
@@ -143,34 +141,45 @@ describe('Plan Generation Workflow Integration', () => {
             file_size: 524288,
             media_type: 'voice_message',
             mime_type: 'audio/ogg',
-            duration_seconds: 15
-          }
-        ]
+            duration_seconds: 15,
+          },
+        ],
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(telegramExportWithMedia, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(telegramExportWithMedia, null, 2)
+      );
 
       // Create mock media files for validation test
       mkdirSync(join(testExportDir, 'photos'), { recursive: true });
       mkdirSync(join(testExportDir, 'files'), { recursive: true });
       mkdirSync(join(testExportDir, 'voice_messages'), { recursive: true });
-      
-      writeFileSync(join(testExportDir, 'photos/photo_1_@2x.jpg'), 'fake jpg content');
-      writeFileSync(join(testExportDir, 'files/document_2.pdf'), 'fake pdf content');
-      writeFileSync(join(testExportDir, 'voice_messages/voice_3.ogg'), 'fake ogg content');
+
+      writeFileSync(
+        join(testExportDir, 'photos/photo_1_@2x.jpg'),
+        'fake jpg content'
+      );
+      writeFileSync(
+        join(testExportDir, 'files/document_2.pdf'),
+        'fake pdf content'
+      );
+      writeFileSync(
+        join(testExportDir, 'voice_messages/voice_3.ogg'),
+        'fake ogg content'
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir} --output ${testOutputDir} --validate-media`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Plan generation not yet implemented');
-        
+
+        expect(output).toContain('Import plan generated successfully!');
+
         // When implemented, should test:
         // - All media files are validated
         // - Generated plan includes media paths
         // - Statistics include media file counts and sizes
-        
       } catch (error) {
         throw new Error(`Media plan generation failed: ${error.message}`);
       }
@@ -189,15 +198,15 @@ describe('Plan Generation Workflow Integration', () => {
             date_unixtime: '1735732800',
             from: 'Alice Smith',
             from_id: 'user987654321',
-            text: 'Here\'s a huge video file',
+            text: "Here's a huge video file",
             text_entities: [
-              { type: 'plain', text: 'Here\'s a huge video file' }
+              { type: 'plain', text: "Here's a huge video file" },
             ],
             file: 'videos/huge_video.mp4',
             file_size: 104857600, // 100MB - exceeds typical limits
             media_type: 'video_message',
             mime_type: 'video/mp4',
-            duration_seconds: 600
+            duration_seconds: 600,
           },
           {
             id: 2,
@@ -208,26 +217,28 @@ describe('Plan Generation Workflow Integration', () => {
             from_id: 'user123456789',
             text: 'Small message should work fine',
             text_entities: [
-              { type: 'plain', text: 'Small message should work fine' }
-            ]
-          }
-        ]
+              { type: 'plain', text: 'Small message should work fine' },
+            ],
+          },
+        ],
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(largeFileExport, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(largeFileExport, null, 2)
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir} --output ${testOutputDir} --skip-large-files`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 15000 });
-        
-        expect(output).toContain('Plan generation not yet implemented');
-        
+
+        expect(output).toContain('Import plan generated successfully!');
+
         // When implemented, should test:
         // - Large file is moved to skipped messages
         // - Small message is included in plan
         // - Statistics reflect the filtering
-        
       } catch (error) {
         throw new Error(`Skip large files workflow failed: ${error.message}`);
       }
@@ -239,19 +250,24 @@ describe('Plan Generation Workflow Integration', () => {
       const malformedExport = {
         name: 'Test Chat',
         // missing required fields: type, id, messages
-        invalid_field: 'should not be here'
+        invalid_field: 'should not be here',
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(malformedExport, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(malformedExport, null, 2)
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir}`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 10000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(3);
-        expect(error.stderr || error.stdout).toMatch(/invalid.*format|missing.*field/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /invalid.*format|missing.*field/i
+        );
       }
     });
 
@@ -260,21 +276,23 @@ describe('Plan Generation Workflow Integration', () => {
         name: 'Empty Chat',
         type: 'personal_chat',
         id: 123456,
-        messages: []
+        messages: [],
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(emptyExport, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(emptyExport, null, 2)
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir}`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
-        expect(output).toContain('Plan generation not yet implemented');
-        
+
+        expect(output).toContain('Import plan generated successfully!');
+
         // When implemented, should generate valid but empty plan
         // expect(existsSync(join(outputDir, 'import-plan.json'))).toBe(true);
-        
       } catch (error) {
         throw new Error(`Empty export handling failed: ${error.message}`);
       }
@@ -293,28 +311,33 @@ describe('Plan Generation Workflow Integration', () => {
             date_unixtime: '1735732800',
             from: 'Alice Smith',
             from_id: 'user987654321',
-            text: 'Photo that doesn\'t exist',
+            text: "Photo that doesn't exist",
             text_entities: [
-              { type: 'plain', text: 'Photo that doesn\'t exist' }
+              { type: 'plain', text: "Photo that doesn't exist" },
             ],
             photo: 'photos/non_existent_photo.jpg',
             photo_file_size: 1048576,
             width: 1920,
-            height: 1080
-          }
-        ]
+            height: 1080,
+          },
+        ],
       };
 
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(exportWithMissingMedia, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(exportWithMissingMedia, null, 2)
+      );
 
       const command = `node ${CLI_PATH} plan ${testExportDir} --validate-media`;
-      
+
       try {
         execSync(command, { encoding: 'utf8', timeout: 10000 });
         throw new Error('Command should have failed');
       } catch (error) {
         expect(error.status).toBe(5);
-        expect(error.stderr || error.stdout).toMatch(/media.*validation.*failed|files.*missing/i);
+        expect(error.stderr || error.stdout).toMatch(
+          /media.*validation.*failed|files.*missing/i
+        );
       }
     });
   });
@@ -335,26 +358,28 @@ describe('Plan Generation Workflow Integration', () => {
             from_id: 'user111222333',
             text: 'Test message for format testing',
             text_entities: [
-              { type: 'plain', text: 'Test message for format testing' }
-            ]
-          }
-        ]
+              { type: 'plain', text: 'Test message for format testing' },
+            ],
+          },
+        ],
       };
-      writeFileSync(join(testExportDir, 'result.json'), JSON.stringify(simpleExport, null, 2));
+      writeFileSync(
+        join(testExportDir, 'result.json'),
+        JSON.stringify(simpleExport, null, 2)
+      );
     });
 
     it('should output human-readable format by default', async () => {
       const command = `node ${CLI_PATH} plan ${testExportDir}`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // Should contain human-readable elements
         expect(output).toMatch(/[✓]/);
-        
+
         // Should NOT be valid JSON
         expect(() => JSON.parse(output)).toThrow();
-        
       } catch (error) {
         throw new Error(`Human format test failed: ${error.message}`);
       }
@@ -362,19 +387,18 @@ describe('Plan Generation Workflow Integration', () => {
 
     it('should output valid JSON when requested', async () => {
       const command = `node ${CLI_PATH} plan ${testExportDir} --format json`;
-      
+
       try {
         const output = execSync(command, { encoding: 'utf8', timeout: 10000 });
-        
+
         // When implemented, output should be valid JSON
         // For now, just verify format option is accepted
-        expect(output).toContain('Plan generation not yet implemented');
-        
+        expect(output).toContain('Import plan generated successfully!');
+
         // When implemented:
         // const jsonOutput = JSON.parse(output);
         // expect(jsonOutput).toHaveProperty('status');
         // expect(jsonOutput).toHaveProperty('statistics');
-        
       } catch (error) {
         throw new Error(`JSON format test failed: ${error.message}`);
       }

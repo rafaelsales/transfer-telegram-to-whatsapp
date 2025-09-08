@@ -12,24 +12,26 @@ describe('ProgressRecord Schema Contract', () => {
 
   beforeAll(() => {
     // Load the JSON Schema
-    const schemaPath = resolve('specs/001-this-project-is/contracts/file-formats.json');
+    const schemaPath = resolve(
+      'specs/001-this-project-is/contracts/file-formats.json'
+    );
     const schemaContent = JSON.parse(readFileSync(schemaPath, 'utf8'));
-    
+
     ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
-    
+
     // Add schema and compile validators
     ajv.addSchema(schemaContent);
     schema = schemaContent.definitions;
-    
+
     validateProgressRecord = ajv.compile({
       ...schema.ProgressRecord,
-      definitions: schemaContent.definitions
+      definitions: schemaContent.definitions,
     });
-    
+
     validateProgressSummary = ajv.compile({
       ...schema.ProgressSummary,
-      definitions: schemaContent.definitions
+      definitions: schemaContent.definitions,
     });
   });
 
@@ -41,7 +43,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'sent',
         timestamp: 1735732800000,
         retryCount: 0,
-        sentMessageId: 'whatsapp_message_id_abc123'
+        sentMessageId: 'whatsapp_message_id_abc123',
       };
 
       const isValid = validateProgressRecord(validRecord);
@@ -58,7 +60,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'failed',
         timestamp: 1735732900000,
         errorMessage: 'WhatsApp rate limit exceeded',
-        retryCount: 3
+        retryCount: 3,
       };
 
       const isValid = validateProgressRecord(validRecord);
@@ -75,7 +77,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'sent',
         timestamp: 1735733000000,
         retryCount: 0,
-        sentMessageId: 'whatsapp_msg_xyz789'
+        sentMessageId: 'whatsapp_msg_xyz789',
       };
 
       const isValid = validateProgressRecord(validRecord);
@@ -92,7 +94,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'failed',
         timestamp: 1735733100000,
         errorMessage: 'Network timeout after multiple retries',
-        retryCount: 10
+        retryCount: 10,
       };
 
       const isValid = validateProgressRecord(validRecord);
@@ -110,7 +112,7 @@ describe('ProgressRecord Schema Contract', () => {
         telegramId: 123,
         status: 'sent',
         timestamp: 1735732800000,
-        retryCount: 0
+        retryCount: 0,
       };
 
       const isValid = validateProgressRecord(invalidRecord);
@@ -119,8 +121,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/messageId',
-            schemaPath: '#/properties/messageId/pattern'
-          })
+            schemaPath: '#/properties/messageId/pattern',
+          }),
         ])
       );
     });
@@ -131,7 +133,7 @@ describe('ProgressRecord Schema Contract', () => {
         telegramId: 123,
         status: 'invalid_status',
         timestamp: 1735732800000,
-        retryCount: 0
+        retryCount: 0,
       };
 
       const isValid = validateProgressRecord(invalidRecord);
@@ -140,8 +142,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/status',
-            schemaPath: '#/properties/status/enum'
-          })
+            schemaPath: '#/properties/status/enum',
+          }),
         ])
       );
     });
@@ -152,7 +154,7 @@ describe('ProgressRecord Schema Contract', () => {
         telegramId: 123,
         status: 'sent',
         timestamp: -1,
-        retryCount: 0
+        retryCount: 0,
       };
 
       const isValid = validateProgressRecord(invalidRecord);
@@ -161,8 +163,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/timestamp',
-            schemaPath: '#/properties/timestamp/minimum'
-          })
+            schemaPath: '#/properties/timestamp/minimum',
+          }),
         ])
       );
     });
@@ -173,7 +175,7 @@ describe('ProgressRecord Schema Contract', () => {
         telegramId: 123,
         status: 'sent',
         timestamp: 1735732800000,
-        retryCount: -1
+        retryCount: -1,
       };
 
       const isValid = validateProgressRecord(invalidRecord);
@@ -182,8 +184,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/retryCount',
-            schemaPath: '#/properties/retryCount/minimum'
-          })
+            schemaPath: '#/properties/retryCount/minimum',
+          }),
         ])
       );
     });
@@ -193,17 +195,17 @@ describe('ProgressRecord Schema Contract', () => {
         messageId: '12345678-1234-4123-a123-123456789abc',
         // telegramId missing
         status: 'sent',
-        timestamp: 1735732800000
+        timestamp: 1735732800000,
         // retryCount missing
       };
 
       const isValid = validateProgressRecord(invalidRecord);
       expect(isValid).toBe(false);
-      
+
       const missingFields = validateProgressRecord.errors
         .filter(err => err.keyword === 'required')
         .map(err => err.params.missingProperty);
-      
+
       expect(missingFields).toEqual(
         expect.arrayContaining(['telegramId', 'retryCount'])
       );
@@ -221,7 +223,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 43,
         failedMessages: 2,
         currentPosition: 45,
-        status: 'running'
+        status: 'running',
       };
 
       const isValid = validateProgressSummary(validSummary);
@@ -241,7 +243,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 98,
         failedMessages: 2,
         currentPosition: 100,
-        status: 'completed'
+        status: 'completed',
       };
 
       const isValid = validateProgressSummary(validSummary);
@@ -261,7 +263,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 20,
         failedMessages: 5,
         currentPosition: 25,
-        status: 'failed'
+        status: 'failed',
       };
 
       const isValid = validateProgressSummary(validSummary);
@@ -281,7 +283,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 15,
         failedMessages: 0,
         currentPosition: 15,
-        status: 'paused'
+        status: 'paused',
       };
 
       const isValid = validateProgressSummary(validSummary);
@@ -303,7 +305,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 43,
         failedMessages: 2,
         currentPosition: 45,
-        status: 'invalid_status'
+        status: 'invalid_status',
       };
 
       const isValid = validateProgressSummary(invalidSummary);
@@ -312,8 +314,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/status',
-            schemaPath: '#/properties/status/enum'
-          })
+            schemaPath: '#/properties/status/enum',
+          }),
         ])
       );
     });
@@ -328,14 +330,14 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: -3,
         failedMessages: -2,
         currentPosition: -5,
-        status: 'running'
+        status: 'running',
       };
 
       const isValid = validateProgressSummary(invalidSummary);
       expect(isValid).toBe(false);
-      
-      const negativeValueErrors = validateProgressSummary.errors.filter(err => 
-        err.keyword === 'minimum'
+
+      const negativeValueErrors = validateProgressSummary.errors.filter(
+        err => err.keyword === 'minimum'
       );
       expect(negativeValueErrors.length).toBeGreaterThan(0);
     });
@@ -350,7 +352,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 43,
         failedMessages: 2,
         currentPosition: 45,
-        status: 'running'
+        status: 'running',
       };
 
       const isValid = validateProgressSummary(invalidSummary);
@@ -359,8 +361,8 @@ describe('ProgressRecord Schema Contract', () => {
         expect.arrayContaining([
           expect.objectContaining({
             instancePath: '/startedAt',
-            schemaPath: '#/properties/startedAt/format'
-          })
+            schemaPath: '#/properties/startedAt/format',
+          }),
         ])
       );
     });
@@ -375,16 +377,16 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 43,
         failedMessages: 2,
         currentPosition: 45,
-        status: 'running'
+        status: 'running',
       };
 
       const isValid = validateProgressSummary(invalidSummary);
       expect(isValid).toBe(false);
-      
+
       const missingFields = validateProgressSummary.errors
         .filter(err => err.keyword === 'required')
         .map(err => err.params.missingProperty);
-      
+
       expect(missingFields).toEqual(
         expect.arrayContaining(['lastUpdated', 'processedMessages'])
       );
@@ -402,7 +404,7 @@ describe('ProgressRecord Schema Contract', () => {
         successfulMessages: 0,
         failedMessages: 0,
         currentPosition: 0,
-        status: 'completed'
+        status: 'completed',
       };
 
       const isValid = validateProgressSummary(validSummary);
@@ -419,7 +421,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'sent',
         timestamp: 0,
         retryCount: 0,
-        sentMessageId: 'msg_id_0'
+        sentMessageId: 'msg_id_0',
       };
 
       const isValid = validateProgressRecord(validRecord);
@@ -436,7 +438,7 @@ describe('ProgressRecord Schema Contract', () => {
         status: 'sent',
         timestamp: 9007199254740991, // Max safe integer in JS
         retryCount: 1000,
-        sentMessageId: 'very_long_whatsapp_message_id_with_lots_of_characters'
+        sentMessageId: 'very_long_whatsapp_message_id_with_lots_of_characters',
       };
 
       const isValid = validateProgressRecord(validRecord);

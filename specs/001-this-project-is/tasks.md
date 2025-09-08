@@ -42,66 +42,66 @@ Single project structure from plan.md:
 - **Tests**: `tests/contract/`, `tests/integration/`, `tests/unit/`
 
 ## Phase 3.1: Setup
-- [ ] T001 Create Node.js project structure with ES modules support
-- [ ] T002 Initialize package.json with Commander.js, whatsapp-web.js, Jest dependencies
-- [ ] T003 [P] Configure ESLint and Prettier for Node.js ES modules
-- [ ] T004 [P] Set up Jest configuration for ES modules testing
-- [ ] T005 [P] Create basic CLI entry point in src/cli/index.js with Commander.js
+- [x] T001 Create Node.js project structure with ES modules support
+- [x] T002 Initialize package.json with Commander.js, whatsapp-web.js, Jest dependencies
+- [x] T003 [P] Configure ESLint and Prettier for Node.js ES modules
+- [x] T004 [P] Set up Jest configuration for ES modules testing
+- [x] T005 [P] Create basic CLI entry point in src/cli/index.js with Commander.js
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
 
 ### Contract Tests
-- [ ] T006 [P] CLI contract test for `plan` command in tests/contract/test_plan_command.js
-- [ ] T007 [P] CLI contract test for `execute` command in tests/contract/test_execute_command.js
-- [ ] T008 [P] File format validation test for ImportPlan schema in tests/contract/test_import_plan_schema.js
-- [ ] T009 [P] File format validation test for ProgressRecord schema in tests/contract/test_progress_schema.js
+- [x] T006 [P] CLI contract test for `plan` command in tests/contract/test_plan_command.js
+- [x] T007 [P] CLI contract test for `execute` command in tests/contract/test_execute_command.js
+- [x] T008 [P] File format validation test for ImportPlan schema in tests/contract/test_import_plan_schema.js
+- [x] T009 [P] File format validation test for ProgressRecord schema in tests/contract/test_progress_schema.js
 
 ### Integration Tests
-- [ ] T010 [P] Integration test for complete plan generation workflow in tests/integration/test_plan_generation.js
-- [ ] T011 [P] Integration test for WhatsApp import execution in tests/integration/test_whatsapp_import.js
-- [ ] T012 [P] Integration test for idempotent resume functionality in tests/integration/test_resume_import.js
-- [ ] T013 [P] Integration test for rate limiting behavior in tests/integration/test_rate_limiting.js
+- [x] T010 [P] Integration test for complete plan generation workflow in tests/integration/test_plan_generation.js
+- [x] T011 [P] Integration test for WhatsApp import execution in tests/integration/test_whatsapp_import.js
+- [x] T012 [P] Integration test for idempotent resume functionality in tests/integration/test_resume_import.js
+- [x] T013 [P] Integration test for rate limiting behavior in tests/integration/test_rate_limiting.js
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 
 ### Data Models
-- [ ] T014 [P] TelegramMessage model with validation in src/models/TelegramMessage.js
-- [ ] T015 [P] WhatsAppMessage model with validation in src/models/WhatsAppMessage.js
-- [ ] T016 [P] ImportPlan model with validation in src/models/ImportPlan.js
-- [ ] T017 [P] ProgressRecord model with validation in src/models/ProgressRecord.js
-- [ ] T018 [P] CLIConfig model with validation in src/models/CLIConfig.js
+- [x] T014 [P] TelegramMessage model with validation in src/models/TelegramMessage.js
+- [x] T015 [P] WhatsAppMessage model with validation in src/models/WhatsAppMessage.js
+- [x] T016 [P] ImportPlan model with validation in src/models/ImportPlan.js
+- [x] T017 [P] ProgressRecord model with validation in src/models/ProgressRecord.js
+- [x] T018 [P] CLIConfig model with validation in src/models/CLIConfig.js
 
 ### Core Services
-- [ ] T019 [P] TelegramParser service in src/services/TelegramParser.js
-- [ ] T020 [P] PlanGenerator service in src/services/PlanGenerator.js
-- [ ] T021 WhatsAppImporter service in src/services/WhatsAppImporter.js
-- [ ] T022 ProgressTracker service in src/services/ProgressTracker.js
-- [ ] T023 [P] MediaValidator service in src/services/MediaValidator.js
+- [x] T019 [P] TelegramParser service in src/services/TelegramParser.js
+- [x] T020 [P] PlanGenerator service in src/services/PlanGenerator.js
+- [x] T021 WhatsAppImporter service in src/services/WhatsAppImporter.js
+- [x] T022 ProgressTracker service in src/services/ProgressTracker.js
+- [x] T023 [P] MediaValidator service in src/services/MediaValidator.js
 
 ### CLI Commands
-- [ ] T024 Plan command implementation in src/cli/commands/PlanCommand.js
-- [ ] T025 Execute command implementation in src/cli/commands/ExecuteCommand.js
+- [x] T024 Plan command implementation in src/cli/commands/PlanCommand.js
+- [x] T025 Execute command implementation in src/cli/commands/ExecuteCommand.js
 
 ### Shared Libraries
-- [ ] T026 [P] File system utilities in src/lib/FileUtils.js
-- [ ] T027 [P] JSON schema validation in src/lib/SchemaValidator.js
+- [x] T026 [P] File system utilities in src/lib/FileUtils.js
+- [x] T027 [P] JSON schema validation in src/lib/SchemaValidator.js
 
 ## Phase 3.4: Integration
-- [ ] T028 WhatsApp client connection management in WhatsAppImporter
-- [ ] T029 Rate limiting implementation with configurable delays
-- [ ] T030 Error handling and retry logic integration
-- [ ] T031 Progress tracking with atomic file operations
+- [x] T028 WhatsApp client connection management in WhatsAppImporter
+- [x] T029 Rate limiting implementation with configurable delays
+- [x] T030 Error handling and retry logic integration
+- [x] T031 Progress tracking with atomic file operations
 
 ## Phase 3.5: Polish
-- [ ] T032 [P] Unit tests for TelegramParser in tests/unit/test_telegram_parser.js
-- [ ] T033 [P] Unit tests for PlanGenerator in tests/unit/test_plan_generator.js
-- [ ] T034 [P] Unit tests for MediaValidator in tests/unit/test_media_validator.js
-- [ ] T035 [P] Unit tests for file utilities in tests/unit/test_file_utils.js
-- [ ] T036 Performance tests for large exports (1000+ messages)
-- [ ] T037 Cross-platform compatibility tests (Windows, macOS, Linux)
-- [ ] T038 [P] Update CLAUDE.md with final implementation context
-- [ ] T039 Remove code duplication and optimize imports
+- [x] T032 [P] Unit tests for TelegramParser in tests/unit/test_telegram_parser.js
+- [x] T033 [P] Unit tests for PlanGenerator in tests/unit/test_plan_generator.js
+- [x] T034 [P] Unit tests for MediaValidator in tests/unit/test_media_validator.js
+- [x] T035 [P] Unit tests for file utilities in tests/unit/test_file_utils.js
+- [x] T036 Performance tests for large exports (1000+ messages)
+- [x] T037 Cross-platform compatibility tests (Windows, macOS, Linux)
+- [x] T038 [P] Update CLAUDE.md with final implementation context
+- [x] T039 Remove code duplication and optimize imports
 - [ ] T040 Execute manual testing scenarios from quickstart.md
 
 ## Dependencies
