@@ -268,17 +268,20 @@ export class PlanGenerator {
    * Extract content from Telegram message
    */
   _extractContent(telegramMsg) {
+    const datePrefix = `[${telegramMsg.date}]`;
+
     if (telegramMsg.text) {
       // Convert text entities to plain text for now
       // In a more sophisticated implementation, you might preserve formatting
-      return this._convertTextEntities(
+      const textContent = this._convertTextEntities(
         telegramMsg.text,
         telegramMsg.text_entities
       );
+      return `${datePrefix} ${textContent}`;
     }
 
-    // For media messages, return empty content or caption
-    return '';
+    // For media messages, return just the date prefix
+    return datePrefix;
   }
 
   /**
