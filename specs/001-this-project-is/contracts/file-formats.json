@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "TelegramMessage": {
+      "type": "object",
+      "required": ["id", "type", "date", "date_unixtime", "text", "text_entities"],
+      "properties": {
+        "id": { "type": "number" },
+        "type": { "enum": ["message", "service"] },
+        "date": { "type": "string", "format": "date-time" },
+        "date_unixtime": { "type": "string", "pattern": "^[0-9]+$" },
+        "from": { "type": "string" },
+        "from_id": { "type": "string" },
+        "text": { "type": "string" },
+        "text_entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "enum": ["plain", "bold", "italic", "code", "pre", "link", "mention"] },
+              "text": { "type": "string" },
+              "href": { "type": "string" }
+            }
+          }
+        },
+        "photo": { "type": "string" },
+        "photo_file_size": { "type": "number", "minimum": 0 },
+        "width": { "type": "number", "minimum": 1 },
+        "height": { "type": "number", "minimum": 1 },
+        "file": { "type": "string" },
+        "file_size": { "type": "number", "minimum": 0 },
+        "media_type": { "enum": ["voice_message", "video_message", "document"] },
+        "mime_type": { "type": "string" },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "reply_to_message_id": { "type": "number" },
+        "forwarded_from": { "type": "string" },
+        "edited": { "type": "string", "format": "date-time" },
+        "edited_unixtime": { "type": "string", "pattern": "^[0-9]+$" },
+        "reactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "count", "emoji"],
+            "properties": {
+              "type": { "const": "emoji" },
+              "count": { "type": "number", "minimum": 1 },
+              "emoji": { "type": "string", "minLength": 1 },
+              "recent": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["from", "from_id", "date"],
+                  "properties": {
+                    "from": { "type": "string" },
+                    "from_id": { "type": "string" },
+                    "date": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "actor": { "type": "string" },
+        "actor_id": { "type": "string" },
+        "action": { "type": "string" },
+        "title": { "type": "string" },
+        "members": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "WhatsAppMessage": {
+      "type": "object",
+      "required": ["id", "telegramId", "type", "content", "timestamp", "sender", "chatId", "status"],
+      "properties": {
+        "id": { 
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "telegramId": { "type": "number" },
+        "type": { "enum": ["text", "image", "video", "audio", "document"] },
+        "content": { "type": "string" },
+        "mediaPath": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "timestamp": { "type": "number", "minimum": 0 },
+        "sender": { "type": "string" },
+        "chatId": { "type": "string" },
+        "quotedMessage": { "type": "string" },
+        "status": { "enum": ["pending", "processing", "sent", "failed", "skipped"] },
+        "errorMessage": { "type": "string" },
+        "sentAt": { "type": "number", "minimum": 0 }
+      }
+    },
+    "ImportPlan": {
+      "type": "object",
+      "required": ["version", "metadata", "messages", "skippedMessages", "statistics"],
+      "properties": {
+        "version": { 
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "metadata": {
+          "type": "object",
+          "required": ["generatedAt", "telegramExportPath", "outputPath", "totalMessages", "supportedMessages", "skippedMessages", "mediaFiles"],
+          "properties": {
+            "generatedAt": { "type": "string", "format": "date-time" },
+            "telegramExportPath": { "type": "string" },
+            "outputPath": { "type": "string" },
+            "totalMessages": { "type": "number", "minimum": 0 },
+            "supportedMessages": { "type": "number", "minimum": 0 },
+            "skippedMessages": { "type": "number", "minimum": 0 },
+            "mediaFiles": { "type": "number", "minimum": 0 }
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/WhatsAppMessage" }
+        },
+        "skippedMessages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["telegramId", "reason", "originalMessage", "explanation"],
+            "properties": {
+              "telegramId": { "type": "number" },
+              "reason": { "enum": ["service_message", "unsupported_media", "poll_message", "community_feature", "missing_file"] },
+              "originalMessage": { "$ref": "#/definitions/TelegramMessage" },
+              "explanation": { "type": "string" }
+            }
+          }
+        },
+        "statistics": {
+          "type": "object",
+          "required": ["messageTypes", "mediaTypes", "totalSize", "dateRange"],
+          "properties": {
+            "messageTypes": {
+              "type": "object",
+              "patternProperties": {
+                "^[a-z_]+$": { "type": "number", "minimum": 0 }
+              }
+            },
+            "mediaTypes": {
+              "type": "object", 
+              "patternProperties": {
+                "^[a-z_]+$": { "type": "number", "minimum": 0 }
+              }
+            },
+            "totalSize": { "type": "number", "minimum": 0 },
+            "dateRange": {
+              "type": "object",
+              "required": ["earliest", "latest"],
+              "properties": {
+                "earliest": { "type": "string", "format": "date-time" },
+                "latest": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ProgressRecord": {
+      "type": "object",
+      "required": ["messageId", "telegramId", "status", "timestamp", "retryCount"],
+      "properties": {
+        "messageId": { 
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "telegramId": { "type": "number" },
+        "status": { "enum": ["sent", "failed"] },
+        "timestamp": { "type": "number", "minimum": 0 },
+        "errorMessage": { "type": "string" },
+        "retryCount": { "type": "number", "minimum": 0 },
+        "sentMessageId": { "type": "string" }
+      }
+    },
+    "ProgressSummary": {
+      "type": "object",
+      "required": ["planPath", "startedAt", "lastUpdated", "totalMessages", "processedMessages", "successfulMessages", "failedMessages", "currentPosition", "status"],
+      "properties": {
+        "planPath": { "type": "string" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "totalMessages": { "type": "number", "minimum": 0 },
+        "processedMessages": { "type": "number", "minimum": 0 },
+        "successfulMessages": { "type": "number", "minimum": 0 },
+        "failedMessages": { "type": "number", "minimum": 0 },
+        "currentPosition": { "type": "number", "minimum": 0 },
+        "status": { "enum": ["running", "completed", "failed", "paused"] }
+      }
+    },
+    "CLIConfig": {
+      "type": "object",
+      "properties": {
+        "sleepRange": {
+          "type": "object",
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "number", "minimum": 1 },
+            "max": { "type": "number", "minimum": 1 }
+          }
+        },
+        "whatsappTimeout": { "type": "number", "minimum": 1000 },
+        "maxRetries": { "type": "number", "minimum": 0, "maximum": 10 },
+        "maxFileSize": { "type": "number", "minimum": 1024 },
+        "supportedMediaTypes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z]+/[a-z0-9.-]+$" }
+        },
+        "logLevel": { "enum": ["error", "warn", "info", "debug"] },
+        "outputFormat": { "enum": ["json", "human"] }
+      }
+    }
+  },
+  "type": "object",
+  "title": "Telegram to WhatsApp File Formats",
+  "description": "JSON Schema definitions for all file formats used by the Telegram to WhatsApp CLI tool"
+}
