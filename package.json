@@ -1,0 +1,42 @@
+{
+  "name": "telegram-to-whatsapp",
+  "version": "1.0.0",
+  "description": "CLI tool for importing Telegram chat exports to WhatsApp",
+  "type": "module",
+  "main": "src/cli/index.js",
+  "bin": {
+    "telegram-to-whatsapp": "./src/cli/index.js"
+  },
+  "scripts": {
+    "start": "node src/cli/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
+    "lint": "echo 'Linting disabled for now'",
+    "lint:fix": "echo 'Linting disabled for now'",
+    "format": "echo 'Formatting disabled for now'"
+  },
+  "keywords": [
+    "telegram",
+    "whatsapp",
+    "cli",
+    "export",
+    "import",
+    "migration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "whatsapp-web.js": "^1.23.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
