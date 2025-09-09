@@ -247,14 +247,8 @@ export class PlanGenerator {
         case 'video_message':
           return 'video';
         case 'voice_message':
-          return 'document'; // Send as document to preserve date prefix caption
+          return 'audio';
         case 'document':
-          // Determine based on MIME type
-          if (telegramMsg.mime_type) {
-            if (telegramMsg.mime_type.startsWith('image/')) return 'image';
-            if (telegramMsg.mime_type.startsWith('video/')) return 'video';
-            if (telegramMsg.mime_type.startsWith('audio/')) return 'document'; // Send as document to preserve date caption
-          }
           return 'document';
         default:
           return 'document';
@@ -269,7 +263,8 @@ export class PlanGenerator {
    */
   _extractContent(telegramMsg) {
     const formattedDate = telegramMsg.date.replace('T', ' ');
-    const datePrefix = `[${formattedDate}]`;
+    const sender = telegramMsg.from || 'Unknown';
+    const prefix = `[${formattedDate}] [${sender}]`;
 
     if (telegramMsg.text) {
       // Convert text entities to plain text for now
@@ -278,11 +273,11 @@ export class PlanGenerator {
         telegramMsg.text,
         telegramMsg.text_entities
       );
-      return `${datePrefix} ${textContent}`;
+      return `${prefix} ${textContent}`;
     }
 
-    // For media messages, return just the date prefix
-    return datePrefix;
+    // For media messages, return just the prefix with date and sender
+    return prefix;
   }
 
   /**

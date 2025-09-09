@@ -117,24 +117,10 @@ export class MediaValidator {
     const mimeType = validation.mimeType || '';
 
     if (mimeType.startsWith('image/') || mimeType.startsWith('video/')) {
-      const imageVideoLimit = 16 * 1024 * 1024; // 16MB
+      const imageVideoLimit = 100 * 1024 * 1024; // 100MB
       if (fileSize > imageVideoLimit) {
         validation.errors.push(
           `Image/video files cannot exceed 16MB for WhatsApp (current: ${this._formatFileSize(fileSize)})`
-        );
-      }
-    } else if (mimeType.startsWith('audio/')) {
-      const audioLimit = 16 * 1024 * 1024; // 16MB for audio
-      if (fileSize > audioLimit) {
-        validation.errors.push(
-          `Audio files cannot exceed 16MB for WhatsApp (current: ${this._formatFileSize(fileSize)})`
-        );
-      }
-    } else {
-      const documentLimit = 100 * 1024 * 1024; // 100MB for documents
-      if (fileSize > documentLimit) {
-        validation.errors.push(
-          `Document files cannot exceed 100MB for WhatsApp (current: ${this._formatFileSize(fileSize)})`
         );
       }
     }
@@ -194,7 +180,7 @@ export class MediaValidator {
     // Audio validation
     else if (mimeType.startsWith('audio/')) {
       if (
-        !['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm'].includes(
+        !['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm', 'audio/m4a'].includes(
           mimeType
         )
       ) {
@@ -250,7 +236,7 @@ export class MediaValidator {
       '.mp3': 'audio/mpeg',
       '.ogg': 'audio/ogg',
       '.wav': 'audio/wav',
-      '.m4a': 'audio/mp4',
+      '.m4a': 'audio/m4a',
       '.aac': 'audio/aac',
 
       // Documents
