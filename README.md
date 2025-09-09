@@ -5,6 +5,8 @@ A Node.js command-line tool for importing Telegram chat exports to WhatsApp with
 ## Features
 
 - Import Telegram chat exports (result.json format) to WhatsApp
+- **Built-in WhatsApp authentication** - Login once, stay connected
+- **Chat listing** - Easily find chat IDs without browser console
 - **Message date and sender prefixing** - Preserves original timestamps and sender information
 - Rate limiting to avoid WhatsApp detection (3-10 second delays)
 - Progress tracking with resume capability
@@ -34,11 +36,55 @@ npm install
 
 ## Usage
 
-The tool works in two phases: **plan** generation and **execution**.
+The tool works in three steps: **authentication**, **plan** generation, and **execution**.
 
-### 1. Generate Import Plan
+### 1. Login to WhatsApp
 
-First, create an import plan from your Telegram export:
+First, authenticate with WhatsApp Web:
+
+```bash
+# Global installation
+telegram-to-whatsapp login
+
+# Local development
+node src/cli/index.js login
+```
+
+This will:
+- Display a QR code in your terminal
+- Scan the QR code with WhatsApp mobile app
+- Store authentication in `.wwebjs_auth` directory
+- Keep you logged in for future commands
+
+### 2. List Available Chats
+
+Find the chat ID where you want to import messages:
+
+```bash
+# Global installation
+telegram-to-whatsapp list
+
+# Local development
+node src/cli/index.js list
+```
+
+**Example output:**
+```
+🔍 Retrieving WhatsApp chats...
+✓ Connected to WhatsApp
+
+Recent Chats:
+1. Family Group        → 120363044567890123@g.us
+2. John Doe           → 1234567890@c.us
+3. Work Team          → 120363098765432101@g.us
+4. Jane Smith         → 9876543210@c.us
+
+Use the chat ID (right column) with the execute command.
+```
+
+### 3. Generate Import Plan
+
+Create an import plan from your Telegram export:
 
 ```bash
 # Global installation
@@ -70,9 +116,9 @@ Statistics:
 - Estimated import time: ~2.5 hours
 ```
 
-### 2. Execute Import
+### 4. Execute Import
 
-Execute the import plan to WhatsApp:
+Execute the import plan to WhatsApp using the chat ID from step 2:
 
 ```bash
 # Global installation
@@ -94,7 +140,15 @@ node src/cli/index.js execute ./path/to/output/ --target-chat "1234567890@c.us"
 
 ## Getting WhatsApp Chat ID
 
-To find the target chat ID:
+### Recommended Method (Using CLI)
+
+1. Run `telegram-to-whatsapp login` to authenticate
+2. Run `telegram-to-whatsapp list` to see all available chats
+3. Copy the chat ID from the list output
+
+### Alternative Method (Browser Console)
+
+If the list command doesn't show your desired chat:
 
 1. Open WhatsApp Web in your browser
 2. Open Developer Tools (F12)
