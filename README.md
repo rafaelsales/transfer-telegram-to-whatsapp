@@ -5,6 +5,7 @@ A Node.js command-line tool for importing Telegram chat exports to WhatsApp with
 ## Features
 
 - Import Telegram chat exports (result.json format) to WhatsApp
+- **Message date and sender prefixing** - Preserves original timestamps and sender information
 - Rate limiting to avoid WhatsApp detection (3-10 second delays)
 - Progress tracking with resume capability
 - Media file validation and transfer
@@ -48,12 +49,14 @@ node src/cli/index.js plan ./path/to/telegram-export/
 ```
 
 This will:
+
 - Parse your Telegram export (`result.json`)
 - Validate messages and media files
 - Generate an import plan with statistics
 - Save the plan as `import-plan.json`
 
 **Example output:**
+
 ```
 ✓ Parsed 1,247 messages from Telegram export
 ✓ Found 89 media files (photos: 45, videos: 12, documents: 32)
@@ -63,6 +66,7 @@ Statistics:
 - Total messages: 1,247
 - Text messages: 1,158
 - Media messages: 89
+- Messages will include original date and sender info
 - Estimated import time: ~2.5 hours
 ```
 
@@ -74,14 +78,16 @@ Execute the import plan to WhatsApp:
 # Global installation
 telegram-to-whatsapp execute ./path/to/output/ --target-chat "1234567890@c.us"
 
-# Local development  
+# Local development
 node src/cli/index.js execute ./path/to/output/ --target-chat "1234567890@c.us"
 ```
 
 **Required options:**
+
 - `--target-chat`: WhatsApp chat ID (format: `phone@c.us` for individual, `groupid@g.us` for groups)
 
 **Optional options:**
+
 - `--delay-min`: Minimum delay between messages in seconds (default: 3)
 - `--delay-max`: Maximum delay between messages in seconds (default: 10)
 - `--resume`: Resume from previous interruption (default: true)
@@ -107,6 +113,7 @@ The tool expects Telegram exports in the standard JSON format:
 5. Wait for export completion
 
 Your export should contain:
+
 ```
 telegram-export/
 ├── result.json          # Main chat data (required)
@@ -115,6 +122,17 @@ telegram-export/
 ├── voice_messages/      # Audio files (optional)
 └── files/              # Document files (optional)
 ```
+
+### Message Format in WhatsApp
+
+All imported messages will be prefixed with the original timestamp and sender information:
+
+```
+[2024-12-15 14:30:45] [John Doe] Hello, this is the original message
+[2024-12-15 14:31:02] [Jane Smith] Reply with media attachment
+```
+
+This preserves the context and chronology of the original Telegram conversation.
 
 ## Progress Tracking
 
@@ -126,6 +144,7 @@ The tool automatically tracks progress and supports resume:
 - Progress statistics displayed during execution
 
 **Example progress output:**
+
 ```
 🔄 Importing messages to WhatsApp...
 📱 Please scan QR code in WhatsApp Web (if not already authenticated)
@@ -167,6 +186,7 @@ output-directory/
 ## Troubleshooting
 
 ### QR Code Issues
+
 ```bash
 # Clear authentication and rescan
 rm -rf ./output/.wwebjs_auth/
@@ -174,20 +194,24 @@ telegram-to-whatsapp execute ./output/ --target-chat "chat@c.us"
 ```
 
 ### Rate Limiting Detected
+
 ```bash
 # Increase delays between messages
 telegram-to-whatsapp execute ./output/ --target-chat "chat@c.us" --delay-min 10 --delay-max 20
 ```
 
 ### Resume Failed Import
+
 ```bash
 # Resume automatically detects interruption
 telegram-to-whatsapp execute ./output/ --target-chat "chat@c.us" --resume
 ```
 
 ### Large Export Performance
+
 For exports with 1000+ messages:
-- Use SSD storage for better I/O performance  
+
+- Use SSD storage for better I/O performance
 - Ensure stable internet connection
 - Consider running overnight for large imports
 
@@ -202,7 +226,21 @@ npm run lint
 
 # Development with file watching
 npm run dev
+
+# Run both tests and lint (recommended before commits)
+npm test && npm run lint
 ```
+
+### Testing
+
+The project includes comprehensive test coverage:
+
+- **Unit tests**: Test individual components and services
+- **Integration tests**: End-to-end functionality testing
+- **Contract tests**: CLI interface and file format validation
+- **Performance tests**: Large export handling (1000+ messages)
+
+Total: 144+ tests across all test suites
 
 ## License
 
@@ -218,3 +256,4 @@ MIT License - see LICENSE file for details.
 ## Support
 
 For issues and feature requests, please use the GitHub issue tracker.
+
