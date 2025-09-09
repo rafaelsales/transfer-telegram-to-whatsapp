@@ -249,12 +249,6 @@ export class PlanGenerator {
         case 'voice_message':
           return 'audio';
         case 'document':
-          // Determine based on MIME type
-          if (telegramMsg.mime_type) {
-            if (telegramMsg.mime_type.startsWith('image/')) return 'image';
-            if (telegramMsg.mime_type.startsWith('video/')) return 'video';
-            if (telegramMsg.mime_type.startsWith('audio/')) return 'audio';
-          }
           return 'document';
         default:
           return 'document';
@@ -268,17 +262,22 @@ export class PlanGenerator {
    * Extract content from Telegram message
    */
   _extractContent(telegramMsg) {
+    const formattedDate = telegramMsg.date.replace('T', ' ');
+    const sender = telegramMsg.from || 'Unknown';
+    const prefix = `[${formattedDate}] [${sender}]`;
+
     if (telegramMsg.text) {
       // Convert text entities to plain text for now
       // In a more sophisticated implementation, you might preserve formatting
-      return this._convertTextEntities(
+      const textContent = this._convertTextEntities(
         telegramMsg.text,
         telegramMsg.text_entities
       );
+      return `${prefix} ${textContent}`;
     }
 
-    // For media messages, return empty content or caption
-    return '';
+    // For media messages, return just the prefix with date and sender
+    return prefix;
   }
 
   /**

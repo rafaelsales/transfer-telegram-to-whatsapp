@@ -103,7 +103,7 @@ describe('PlanGenerator Unit Tests', () => {
   });
 
   describe('_extractContent', () => {
-    it('should extract text content', () => {
+    it('should extract text content with date prefix', () => {
       const message = new TelegramMessage({
         id: 1,
         type: 'message',
@@ -115,10 +115,10 @@ describe('PlanGenerator Unit Tests', () => {
 
       const content = generator._extractContent(message);
 
-      expect(content).toBe('Hello world');
+      expect(content).toBe('[2025-01-01 12:00:00] [Unknown] Hello world');
     });
 
-    it('should return empty string for media-only messages', () => {
+    it('should return only date prefix for media-only messages', () => {
       const message = new TelegramMessage({
         id: 1,
         type: 'message',
@@ -130,7 +130,39 @@ describe('PlanGenerator Unit Tests', () => {
 
       const content = generator._extractContent(message);
 
-      expect(content).toBe('');
+      expect(content).toBe('[2025-01-01 12:00:00] [Unknown]');
+    });
+
+    it('should handle messages with media and caption', () => {
+      const message = new TelegramMessage({
+        id: 1,
+        type: 'message',
+        date: '2025-01-02T13:30:15',
+        date_unixtime: '1735824615',
+        photo: 'photos/image.jpg',
+        text: 'Photo caption',
+        text_entities: [{ type: 'plain', text: 'Photo caption' }],
+      });
+
+      const content = generator._extractContent(message);
+
+      expect(content).toBe('[2025-01-02 13:30:15] [Unknown] Photo caption');
+    });
+
+    it('should include sender name when available', () => {
+      const message = new TelegramMessage({
+        id: 1,
+        type: 'message',
+        date: '2025-01-01T12:00:00',
+        date_unixtime: '1735732800',
+        from: 'John Doe',
+        text: 'Hello from John',
+        text_entities: [{ type: 'plain', text: 'Hello from John' }],
+      });
+
+      const content = generator._extractContent(message);
+
+      expect(content).toBe('[2025-01-01 12:00:00] [John Doe] Hello from John');
     });
   });
 

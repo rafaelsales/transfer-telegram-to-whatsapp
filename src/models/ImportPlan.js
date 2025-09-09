@@ -159,7 +159,48 @@ export class ImportPlan {
    */
   static fromData(data) {
     ImportPlan.validate(data);
-    return new ImportPlan(data);
+
+    // Convert messages array to WhatsAppMessage instances
+    // Skip media file validation when loading from JSON since files will be validated during actual sending
+    const processedData = {
+      ...data,
+      messages:
+        data.messages?.map(msg => {
+          if (msg instanceof WhatsAppMessage) {
+            return msg;
+          }
+          
+          // Create WhatsAppMessage but temporarily skip file validation for loading
+          const originalValidate = WhatsAppMessage.prototype._validateBusinessRules;
+          WhatsAppMessage.prototype._validateBusinessRules = function() {
+            // Skip media file existence check when loading from JSON
+            // Files will be validated again when actually sending
+            const now = Date.now();
+            if (this.timestamp > now) {
+              throw new Error(
+                `Message timestamp cannot be in the future: ${this.timestamp} > ${now}`
+              );
+            }
+            if (this.sentAt && this.sentAt < this.timestamp) {
+              throw new Error(
+                `sentAt (${this.sentAt}) cannot be before original timestamp (${this.timestamp})`
+              );
+            }
+          };
+          
+          try {
+            const whatsAppMessage = new WhatsAppMessage(msg);
+            WhatsAppMessage.prototype._validateBusinessRules = originalValidate;
+            return whatsAppMessage;
+          } catch (error) {
+            WhatsAppMessage.prototype._validateBusinessRules = originalValidate;
+            throw error;
+          }
+        }) || [],
+      skippedMessages: data.skippedMessages || [],
+    };
+
+    return new ImportPlan(processedData);
   }
 
   /**

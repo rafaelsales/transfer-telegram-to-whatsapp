@@ -74,8 +74,8 @@ export class CLIConfig {
         );
       }
 
-      if (data.sleepRange.min < 1) {
-        throw new Error('Sleep range minimum must be at least 1 second');
+      if (data.sleepRange.min < 0) {
+        throw new Error('Sleep range minimum must be at least 0 seconds');
       }
 
       if (data.sleepRange.max > 60) {
@@ -169,8 +169,8 @@ export class CLIConfig {
     // Single number format
     if (/^\d+$/.test(trimmed)) {
       const value = parseInt(trimmed, 10);
-      if (value < 1 || value > 60) {
-        throw new Error('Sleep value must be between 1 and 60 seconds');
+      if (value < 0 || value > 60) {
+        throw new Error('Sleep value must be between 0 and 60 seconds');
       }
       return { min: value, max: value };
     }
@@ -184,8 +184,8 @@ export class CLIConfig {
     const min = parseInt(rangeMatch[1], 10);
     const max = parseInt(rangeMatch[2], 10);
 
-    if (min < 1 || max > 60) {
-      throw new Error('Sleep range values must be between 1 and 60 seconds');
+    if (min < 0 || max > 60) {
+      throw new Error('Sleep range values must be between 0 and 60 seconds');
     }
 
     if (min > max) {
@@ -269,8 +269,8 @@ export class CLIConfig {
           type: 'object',
           required: ['min', 'max'],
           properties: {
-            min: { type: 'number', minimum: 1, maximum: 60 },
-            max: { type: 'number', minimum: 1, maximum: 60 },
+            min: { type: 'number', minimum: 0, maximum: 60 },
+            max: { type: 'number', minimum: 0, maximum: 60 },
           },
         },
         whatsappTimeout: { type: 'number', minimum: 5000 },
