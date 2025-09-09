@@ -432,6 +432,8 @@ export class WhatsAppImporter {
 
     if (waitTime > 0) {
       await this._sleep(waitTime);
+    } else {
+      await this._sleep(300);
     }
 
     // Add random delay within configured range
