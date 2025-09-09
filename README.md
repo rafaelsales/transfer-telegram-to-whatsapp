@@ -22,16 +22,17 @@ A Node.js command-line tool for importing Telegram chat exports to WhatsApp with
 
 ## Installation
 
-```bash
-npm install -g telegram-to-whatsapp
-```
-
-Or run locally:
+### Straight from GitHub
 
 ```bash
 git clone <repository-url>
 cd move-telegram-to-whatsapp
 npm install
+```
+
+### NPM - Coming soon
+```bash
+npm install -g telegram-to-whatsapp
 ```
 
 ## Usage
